@@ -1,3 +1,6 @@
+
+import java.util.Arrays;
+
 public class Tester {
 	
 	/** Run the algorithm on a test graph.
@@ -38,13 +41,40 @@ public class Tester {
 		testGraph.addEdge(i,k);
 		
 		//run the algorithm
-		Node nodeS = testGraph.getNode(s);
-		double[] p = ProbabilityDistributionAlgorithm.run(nodeS, 3);
+		double[][] transitionVectors =
+			ProbabilityDistributionAlgorithm.run(testGraph, 3);
 		
 		//display the output
-		for (int z = 0; z < p.length; z++) {
-			System.out.println(p[z]);
+		print(transitionVectors);
+		
+		ConvergenceTester convergenceTester =
+			ConvergenceTester.forTransitionMatrix(transitionVectors);
+			
+		int iteration = 1;
+		while (true) {
+			convergenceTester.iterateDistributions(1);
+			System.out.print("2^");
+			System.out.print(iteration++);
+			System.out.print(" iterations; distance ");
+			System.out.println(convergenceTester.convergenceDistance());
+			print(convergenceTester.getTransitionMatrix().getTransitionVectors()
+			);
 		}
+	}
+	
+	private static void print(double[][] transitionVectors) {
+		Arrays.stream(transitionVectors)
+			.map(
+				transitionVector -> {
+					Iterable<String> iterable =
+						Arrays.stream(transitionVector)
+								.mapToObj(Double::toString)
+							::iterator;
+					return String.join(" ", iterable);
+				}
+			)
+			.forEachOrdered(System.out::println);
+		System.out.println();
 	}
 	
 }

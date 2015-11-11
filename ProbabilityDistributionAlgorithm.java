@@ -5,7 +5,6 @@ import java.util.Queue;
 import java.util.Set;
 
 public class ProbabilityDistributionAlgorithm {
-	
 	/**
 	 * The k credit algorithm.
 	 * 
@@ -62,6 +61,14 @@ public class ProbabilityDistributionAlgorithm {
 		//perform and return some algorithm to determine credits
 		double[] p = calculateCredits(nodeTiers, referralLog, neighborCount, k);
 		return p;
+	}
+	
+	static double[][] run(AdjListGraph graph, int k) {
+		return
+			graph.nodeList
+				.stream()
+				.map(node -> run(node, k))
+				.toArray(double[][]::new);
 	}
 	
 	/**
