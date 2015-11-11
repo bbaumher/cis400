@@ -1,6 +1,8 @@
 
 public interface GraphGenerator {
 	
-	public Graph generate(int n, double d);
+	public AdjListGraph generateAdjListGraph(int n, double d);
+	
+	public AdjMatrixGraph generateAdjMatrixGraph(int n, double d);
 
 }

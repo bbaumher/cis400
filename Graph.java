@@ -9,7 +9,7 @@ public interface Graph {
 	
 	public void addEdge(Node i, Node j);
 
-	public void addEdge(int i, int j) throws Exception;
+	public void addEdge(int i, int j) ;
 	
 	public void printGraph();
 	

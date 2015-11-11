@@ -49,7 +49,15 @@ public class Node {
 	}
 	
 	
+	@Override
+	public int hashCode() {
+		return id;
+	}
 	
+	@Override
+	public String toString() {
+		return id + "";
+	}
 	
 
 }

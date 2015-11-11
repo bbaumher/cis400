@@ -5,7 +5,7 @@ public class AdjListGraph implements Graph { // undirected graph
 	
 	int nodes;
 	int nodeCnt;
-	List<Node> nodeList;
+	ArrayList<Node> nodeList;
 	
 	public AdjListGraph(int n) {
 		nodes = n;
@@ -55,10 +55,21 @@ public class AdjListGraph implements Graph { // undirected graph
 		System.out.println("Node size: " + getNodeCnt());
 		
 		for (Node n : nodeList) { // no self loops
+			System.out.print(n.getId() + ": ");
+			boolean printedAlready = false;
 			for (Node j : n.getAdj()) {
-				System.out.println("EDGE: " + n.getId() + ", " + j.getId());
+				if (printedAlready) {
+					System.out.print(", ");
+				}
+				System.out.print(j.getId());
+				printedAlready = true;
 			}
+			System.out.println();
 		}
 		
+	}
+	
+	public Node getNode(int index) {
+		return nodeList.get(index);
 	}
 }

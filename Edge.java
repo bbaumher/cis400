@@ -1,8 +1,8 @@
 
 public class Edge {// for directed graphs if we do that
 	
-	private Node start;
-	private Node end;
+	private final Node start;
+	private final Node end;
 	
 	public Edge(Node a, Node b) {
 		start = a;

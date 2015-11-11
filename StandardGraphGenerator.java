@@ -6,18 +6,32 @@ public class StandardGraphGenerator implements GraphGenerator {
 	}
 
 	@Override
-	public Graph generate(int nodes, double p) {
+	public AdjMatrixGraph generateAdjMatrixGraph(int nodes, double p) {
+		AdjMatrixGraph g = new AdjMatrixGraph(nodes);
+		fillInEdges(g, p);
+		return g;
+	}
+	
+	@Override
+	public AdjListGraph generateAdjListGraph(int nodes, double p) {
+		AdjListGraph g = new AdjListGraph(nodes);
+		fillInEdges(g, p);
+		return g;
+	}
+	
+	/** Randomly fills in the edges of g,
+	 *  each edge appearing with probability p.
+	 *  No self loops are allowed.
+	 */
+	private void fillInEdges (Graph g, double p) {
 		
-		Graph g = new AdjMatrixGraph(nodes);
-		
-		
-		for (int i = 0; i < nodes; i++) { 
-			for (int j = 0; j < nodes; j++) { // directed graphs!!
+		for (int i = 0; i < g.getNodeCnt(); i++) { 
+			for (int j = 0; j < g.getNodeCnt(); j++) { // directed graphs!!
 				if (i == j) {
 					continue;  // no self loops, can change this
 				}
 				double d = Math.random();
-				if (d <= p) {
+				if (d < p) {
 					try {
 						g.addEdge(i,j);
 					} catch (Exception e) {
@@ -28,22 +42,8 @@ public class StandardGraphGenerator implements GraphGenerator {
 			}
 		}
 		
-		return g;
+
 
 	}
 
-	
-	public static void main(String[] args) {
-		GraphGenerator gg = new StandardGraphGenerator();
-		Graph graph = gg.generate(10, .5);
-		
-		graph.printGraph();
-		System.out.println();
-		
-		
-	Graph graph2 = gg.generate(100, .3);
-		
-		graph2.printGraph();
-		System.out.println();
-	}
 }
