@@ -42,7 +42,7 @@ public class Tester {
 		
 		//run the algorithm
 		double[][] transitionVectors =
-			ProbabilityDistributionAlgorithm.run(testGraph, 3);
+			ProbabilityDistributionAlgorithm.getTransitionVectors(testGraph, 3);
 		
 		//display the output
 		print(transitionVectors);

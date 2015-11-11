@@ -8,9 +8,6 @@ import java.util.stream.IntStream;
  * A class representing a transition matrix in a Markov chain.
  */
 class TransitionMatrix {
-  private static final IntFunction<double[][]> ARRAY_GENERATOR =
-    double[][]::new;
-
   /**
    * Each {@code double[]} is a vector representing the probabilities of leaving
    * a certain vertex to each of the other vertices.

@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class ProbabilityDistributionAlgorithm {
 	 * @param k we consider nodes up to k away from the starting node
 	 * @return 
 	 */
-	public static double[] run(Node s, int k) {
+	public static double[] getNeighborVector(Node s, int k) {
 		Set<Node> seenNodes = new HashSet<Node>(); //the nodes that no longer need to be considered
 		Queue<Node> nodeQueue = new LinkedList<Node>(); //the nodes on the current layer of the BFS
 		Set<Node> pendingNodes = new HashSet<Node>(); //the the nodes being discovered on the edge of the BFS
@@ -60,15 +61,41 @@ public class ProbabilityDistributionAlgorithm {
 		
 		//perform and return some algorithm to determine credits
 		double[] p = calculateCredits(nodeTiers, referralLog, neighborCount, k);
+		
 		return p;
 	}
 	
-	static double[][] run(AdjListGraph graph, int k) {
+	static double[][] getTransitionVectors(AdjListGraph graph, int k) {
 		return
 			graph.nodeList
 				.stream()
-				.map(node -> run(node, k))
+				.map(node -> getTransitionVector(node, k, graph.getNodeCnt()))
 				.toArray(double[][]::new);
+	}
+	
+	/**
+	 * The k credit algorithm.
+	 * 
+	 * @param s the starting node
+	 * @param k we consider nodes up to k away from the starting node
+	 * @param graphNodeCount the number  of nodes in the graph
+	 * @return 
+	 */
+	private static double[] getTransitionVector(Node s, int k, int graphNodeCount
+	) {
+		List<Node> adjacencyList = s.getAdj();
+		
+		//perform and return some algorithm to determine credits
+		double[] p = getNeighborVector(s, k);
+		double[] result = new double[graphNodeCount];
+		for (
+			int neighborIndex = p.length - 1;
+			neighborIndex >= 0;
+			neighborIndex--)
+		{
+			result[adjacencyList.get(neighborIndex).getId()] = p[neighborIndex];
+		}
+		return result;
 	}
 	
 	/**

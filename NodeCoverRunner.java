@@ -14,7 +14,9 @@ public class NodeCoverRunner {
 		for (int i = 0; true; i++) {
 			if (coveredNodes.size() == g.getNodeCnt()) return i;
 			
-			double[] probDist = ProbabilityDistributionAlgorithm.run(currentNode, k);
+			double[] probDist =
+				ProbabilityDistributionAlgorithm
+					.getNeighborVector(currentNode, k);
 			currentNode = transition(currentNode, probDist);
 		}
 
