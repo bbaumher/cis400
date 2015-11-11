@@ -40,15 +40,15 @@ public class Tester {
 		testGraph.addEdge(i,k);
 		
 		Node nodeS = testGraph.getNode(s);
-		run(3, nodeS, false);
+		run(3, nodeS);
 	}
 	
-	public static void run(int k, Node s, boolean cumulative) {
+	public static void run(int k, Node s) {
 		Set<Node> A = new HashSet<Node>();
 		Queue<Node> Q = new LinkedList<Node>();
 		Set<Node> C = new HashSet<Node>();
 		int neighborCount = s.getAdj().size();
-		
+		ArrayList<Set<Node>> nodeTiers = new ArrayList<Set<Node>>();
 		ReferralLog referralLog = new ReferralLog(neighborCount);
 		
 		for (int i = 0; i < s.getAdj().size(); i++) {
@@ -56,12 +56,17 @@ public class Tester {
 			referralLog.setValue(v, i, 1);
 			C.add(v);
 		}
+		
 		A.add(s);
+		Set<Node> zerothTier = new HashSet<Node>();
+		zerothTier.add(s);
+		nodeTiers.add(zerothTier);
 		
 		for (int i = 0; i < k-1; i++) {
 			A.addAll(C);
 			Q.addAll(C);
-			C.clear();
+			nodeTiers.add(C);
+			C = new HashSet<Node>();
 			
 			while (!Q.isEmpty()) {
 				Node v = Q.poll();
@@ -75,18 +80,27 @@ public class Tester {
 			}
 		}
 		
+		nodeTiers.add(C);
+		
+		double[] p = calculateCredits(nodeTiers, referralLog, neighborCount, k);
+		
+		for (int i = 0; i < p.length; i++) {
+			System.out.println(p[i]);
+		}
+	}
+	
+	private static double[] calculateCredits(ArrayList<Set<Node>> nodeTiers, 
+			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount];
-		for (Node v : C) {
+		Set<Node> edgeNodes = nodeTiers.get(k);
+		for (Node v : edgeNodes) {
 			int[] referrals = referralLog.getReferral(v);
 			for (int i = 0; i < referrals.length; i++) {
 				int sum = sum(referrals);
 				p[i] += referrals[i] / (double) sum;
 			}
 		}
-		
-		for (int i = 0; i < p.length; i++) {
-			System.out.println(p[i]);
-		}
+		return p;
 	}
 	
 	private static int sum(int[] array) {
