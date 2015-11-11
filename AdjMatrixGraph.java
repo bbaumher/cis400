@@ -1,5 +1,8 @@
+import java.util.ArrayList;
+import java.util.List;
 
-public class AdjMatrixGraph implements Graph{
+
+public class AdjMatrixGraph extends Graph{
 	
 	int[][] adjMatrix;
 	int nodes;
@@ -43,6 +46,38 @@ public class AdjMatrixGraph implements Graph{
 		adjMatrix[i.getId()][j.getId()] = 1;
 	}
 	
+	public List<Integer> getNeighbors(int id) {
+		List<Integer> neighbors = new ArrayList<Integer>();
+		
+		for (int i = 0; i < nodes; i++ ) {
+			if (adjMatrix[id][i] != 0) {
+				neighbors.add(i);
+			}
+		}
+		
+		return neighbors;	
+	}
+	
+	public List<Node> getNeighbors(Node n) {
+		return n.getAdj();
+	}
+	
+	
+	public List<Integer> getInboundNodes(int id) {
+		List<Integer> neighbors = new ArrayList<Integer>();
+		
+		for (int i = 0; i < nodes; i++ ) {
+			if (adjMatrix[i][id] != 0) {
+				neighbors.add(i);
+			}
+		}
+		
+		return neighbors;	
+	}
+	
+	
+	
+	
 	public void printGraph() {
 		System.out.println("Node size: " + getNodeCnt());
 		
@@ -55,5 +90,7 @@ public class AdjMatrixGraph implements Graph{
 		}
 		
 	}
+	
+
 
 }

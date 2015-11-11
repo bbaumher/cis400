@@ -1,4 +1,5 @@
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class Graph {
 	
@@ -13,7 +14,13 @@ public abstract class Graph {
 	public abstract void addEdge(int i, int j) ;
 	
 	public abstract void printGraph();
+
+	public abstract List<Integer> getNeighbors(int node);
 	
+	public abstract List<Node> getNeighbors(Node n);
+	
+	public abstract List<Integer> getInboundNodes(int id); 
+		
 	public Iterator<Node> getDFSIterator(Node s) {
 		return new DFSIterator(s);
 	}

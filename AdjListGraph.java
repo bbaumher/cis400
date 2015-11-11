@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdjListGraph implements Graph { // undirected graph
+public class AdjListGraph extends Graph { // undirected graph
 	
 	int nodes;
 	int nodeCnt;
@@ -71,5 +71,39 @@ public class AdjListGraph implements Graph { // undirected graph
 	
 	public Node getNode(int index) {
 		return nodeList.get(index);
+	}
+
+	@Override
+	public List<Integer> getNeighbors(int node) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Node> getNeighbors(Node n) {
+		return n.getAdj();
+	}
+
+	@Override
+	public List<Integer> getInboundNodes(int id) {
+		List<Integer> neighbors = new ArrayList<Integer>();
+		Node node = this.getNode(id);
+		for (Node n : nodeList) {
+			if (n.getAdj().contains(node)) {
+				neighbors.add(n.getId());
+			}
+		}
+		return neighbors;
+	}
+	
+	public List<Node> getInboundNodes(Node node) {
+		List<Node> neighbors = new ArrayList<Node>();
+		
+		for (Node n : nodeList) {
+			if (n.getAdj().contains(node)) {
+				neighbors.add(n);
+			}
+		}
+		return neighbors;
 	}
 }
