@@ -35,7 +35,7 @@ class TransitionMatrix {
     return
       Arrays.stream(array)
         .map(a -> Arrays.copyOf(a, a.length))
-        .toArray(ARRAY_GENERATOR);
+        .toArray(double[][]::new);
   }
   
   /**
@@ -65,7 +65,7 @@ class TransitionMatrix {
                                 [destinationIndex])
                       .sum())
                 .toArray())
-          .toArray(ARRAY_GENERATOR));
+          .toArray(double[][]::new));
   }
   
   /**
