@@ -1,5 +1,6 @@
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class Tester {
 	
@@ -40,6 +41,15 @@ public class Tester {
 		testGraph.addEdge(g,j);
 		testGraph.addEdge(i,k);
 		
+		Node sNode = testGraph.getNode(s);
+		Iterator<Node> iter = testGraph.getDFSIterator(sNode);
+		
+		while (iter.hasNext()) {
+			Node node = iter.next();
+			System.out.println(node);
+		}
+		
+		/*
 		//run the algorithm
 		double[][] transitionVectors =
 			ProbabilityDistributionAlgorithm.run(testGraph, 3);
@@ -59,7 +69,7 @@ public class Tester {
 			System.out.println(convergenceTester.convergenceDistance());
 			print(convergenceTester.getTransitionMatrix().getTransitionVectors()
 			);
-		}
+		}*/
 	}
 	
 	private static void print(double[][] transitionVectors) {
