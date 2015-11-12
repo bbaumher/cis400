@@ -90,6 +90,12 @@ public class AdjMatrixGraph extends Graph{
 		}
 		
 	}
+
+	@Override
+	public Node getNode(int i) {
+		// this method doesn't make much sense for adj matrix graphs
+		return null;
+	}
 	
 
 

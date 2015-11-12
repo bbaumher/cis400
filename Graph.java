@@ -23,6 +23,12 @@ public abstract class Graph {
 	public abstract List<Node> getNeighbors(Node n);
 	
 	public abstract List<Integer> getInboundNodes(int id); 
+	
+	public abstract Node getNode(int i);
+	
+	public Iterator<Node> getDFSIterator() {
+		return new DFSIterator(getNode(0));
+	}
 
 	public Iterator<Node> getDFSIterator(Node s) {
 		return new DFSIterator(s);
