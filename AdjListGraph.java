@@ -39,9 +39,7 @@ public class AdjListGraph extends Graph { // undirected graph
 		if (i >= nodes || j >= nodes) {
 			throw new IllegalArgumentException("bad index");
 		}
-		
-		nodeList.get(i).addEdge(nodeList.get(j));
-		
+		nodeList.get(i).addEdge(nodeList.get(j));	
 	}
 	
 	 
@@ -75,9 +73,14 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 
 	@Override
-	public List<Integer> getNeighbors(int node) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Integer> getNeighbors(int id) {
+		Node node = this.getNode(id);
+		List<Node> neighbors = node.getAdj();
+		List<Integer> neighborIds = new ArrayList<Integer>();
+		for ( Node n : neighbors ) {
+			neighborIds.add(n.getId());	
+		}
+		return neighborIds;
 	}
 
 	@Override
