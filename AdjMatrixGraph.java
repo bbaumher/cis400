@@ -20,19 +20,14 @@ public class AdjMatrixGraph extends Graph{
 	}
 
 	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public int getNodeCnt() {
 		return nodes;
 	}
 	
 	// shouldn't be able to add a node, would have to change array size....
 	@Override
-	public void addNode() {
-		nodeCnt++;
+	public Node addNode() {
+		return null;
 	}
 	
 	public void addEdge(int i, int j) {
@@ -74,22 +69,6 @@ public class AdjMatrixGraph extends Graph{
 		
 		return neighbors;	
 	}
-	
-	
-	
-	
-	public void printGraph() {
-		System.out.println("Node size: " + getNodeCnt());
-		
-		for (int i = 0; i < nodes; i++) { // no self loops
-			for (int j = i+1; j < nodes; j++) { // only do probability one way for nodes
-				if (adjMatrix[i][j] == 1) {
-					System.out.println("EDGE: " + i + ", " + j);
-				}
-			}
-		}
-		
-	}
 
 	@Override
 	public Node getNode(int i) {
@@ -113,6 +92,11 @@ public class AdjMatrixGraph extends Graph{
 						.mapToObj(AdjMatrixGraph.this::getNode);
 			}
 		};
+	}
+
+	@Override
+	public Stream<Node> getNodes() {
+		return IntStream.range(0, getNodeCnt()).mapToObj(this::getNode);
 	}
 	
 

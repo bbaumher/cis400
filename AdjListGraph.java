@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class AdjListGraph extends Graph { // undirected graph
@@ -20,21 +21,16 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 
 	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public int getNodeCnt() {
 		return nodes;
 	}
 	
 	@Override
-	public void addNode() {
+	public Node addNode() {
 		Node node = new AdjListNode(nodeCnt);
 		nodeCnt++;
 		nodeList.add(node);
+		return node;
 	}
 	
 	
@@ -49,25 +45,6 @@ public class AdjListGraph extends Graph { // undirected graph
 	
 	public void addEdge(Node i, Node j) {
 		i.addEdge(j);
-	}
-
-	
-	public void printGraph() {
-		System.out.println("Node size: " + getNodeCnt());
-		
-		for (Node n : nodeList) { // no self loops
-			System.out.print(n.getId() + ": ");
-			boolean printedAlready = false;
-			for (Node j : (Iterable<Node>) n.getAdjStream()::iterator) {
-				if (printedAlready) {
-					System.out.print(", ");
-				}
-				System.out.print(j.getId());
-				printedAlready = true;
-			}
-			System.out.println();
-		}
-		
 	}
 	
 	@Override
@@ -107,6 +84,11 @@ public class AdjListGraph extends Graph { // undirected graph
 			}
 		}
 		return neighbors;
+	}
+
+	@Override
+	public Stream<Node> getNodes() {
+		return IntStream.range(0, getNodeCnt()).mapToObj(this::getNode);
 	}
 	
 	private static final class AdjListNode extends Node {
