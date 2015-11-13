@@ -3,19 +3,10 @@ import java.util.stream.Stream;
 
 public abstract class Node {
 	
-	int id;
-	
-	public Node (String info) {
-		
-	}
+	final int id;
 	
 	public Node (int id) {
 		this.id = id;
-	}
-
-	
-	public Node() {
-		
 	}
 	
 	public int getId() {
@@ -30,16 +21,11 @@ public abstract class Node {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
+		if (!(obj instanceof Node)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Node other = (Node) obj;
-		if (id != other.id)
-			return false;
-		return true;
+		}
+		Node node = (Node) obj;
+		return node.id == id;
 	}
 	
 	

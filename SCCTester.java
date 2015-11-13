@@ -1,5 +1,11 @@
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Stack;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 public class SCCTester {
 
@@ -21,4 +27,86 @@ public class SCCTester {
 		return true;
 	}
 
+	public static Iterator<Graph> getStronglyConnectedComponents(Graph graph) {
+		// Algorithm from
+		// https://en.wikipedia.org/wiki/Path-based_strong_component_algorithm
+		return new Iterator<Graph>() {
+			private final Iterator<Node> iterator = graph.getNodes().iterator();
+			private Node nextNode = null;
+			private final Map<Node, Integer> preorderNumbers =
+				new HashMap<>(graph.getNodeCnt());
+			private final Deque<Node> unassignedStack = new ArrayDeque<>();
+			private final Deque<Node> nonloopingStack = new ArrayDeque<>();
+			private final Deque<Node> callStack = new ArrayDeque<>();
+			private final Deque<Iterator<Node>> iterators = new ArrayDeque<>();
+			
+			@Override
+			public boolean hasNext() {
+				if (!callStack.isEmpty() || nextNode != null) {
+					return true;
+				}
+				
+				while (iterator.hasNext()) {
+					nextNode = iterator.next();
+					if (!preorderNumbers.containsKey(nextNode)) {
+						return true;
+					}
+				}
+				nextNode = null;
+				return false;
+			}
+
+			@Override
+			public Graph next() {
+				while (true) {
+					if (!hasNext()) {
+						throw new NoSuchElementException();
+					}
+
+					if (callStack.isEmpty()) {
+						pushOntoStacks(nextNode);
+						nextNode = null;
+					}
+
+					while (iterators.peek().hasNext()) {
+						Node node = iterators.peek().next();
+						Integer preorderNumber = preorderNumbers.get(node);
+						if (preorderNumber == null) {
+							pushOntoStacks(node);
+						}
+						else if (preorderNumber >= 0) {
+							while (
+								preorderNumbers.get(nonloopingStack.peek())
+									> preorderNumber)
+							{
+								nonloopingStack.pop();
+							}
+						}
+					}
+
+					Node node = callStack.pop();
+					iterators.pop();
+					if (nonloopingStack.peek().equals(node)) {
+						Set<Integer> result = new HashSet<>();
+						nonloopingStack.pop();
+						Node nodeInComponent = null;
+						do {
+							nodeInComponent = unassignedStack.pop();
+							result.add(nodeInComponent.getId());
+							preorderNumbers.put(nodeInComponent, -1);
+						} while (!node.equals(nodeInComponent));
+						return Graph.getSubGraph(graph, result);
+					}
+				}
+			}
+			
+			private void pushOntoStacks(Node node) {
+				callStack.push(node);
+				iterators.push(node.getAdjStream().iterator());
+				unassignedStack.push(node);
+				nonloopingStack.push(node);
+				preorderNumbers.put(node, preorderNumbers.size());
+			}
+		};
+	}
 }

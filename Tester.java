@@ -49,10 +49,29 @@ public class Tester {
 			System.out.println(node);
 		}
 		
-		/*
+		Graph graph =
+			new StandardGraphGenerator().generateAdjListGraph(20, 0.2);
+		graph.printGraph();
+		Graph largestComponent = null;
+		Iterator<Graph> iterator =
+			SCCTester.getStronglyConnectedComponents(graph);
+		while (iterator.hasNext()) {
+			Graph component = iterator.next();
+			if (
+				largestComponent == null
+					|| largestComponent.getNodeCnt()
+						< component.getNodeCnt())
+			{
+				largestComponent = component;
+			}
+		}
+		
+		largestComponent.printGraph();
+		
 		//run the algorithm
 		double[][] transitionVectors =
-			ProbabilityDistributionAlgorithm.getTransitionVectors(testGraph, 3);
+			ProbabilityDistributionAlgorithm
+				.getTransitionVectors(largestComponent, 3);
 		
 		//display the output
 		print(transitionVectors);
@@ -69,7 +88,7 @@ public class Tester {
 			System.out.println(convergenceTester.convergenceDistance());
 			print(convergenceTester.getTransitionMatrix().getTransitionVectors()
 			);
-		}*/
+		}
 	}
 	
 	private static void print(double[][] transitionVectors) {

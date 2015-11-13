@@ -58,6 +58,18 @@ public abstract class Graph {
 		return new DFSIterator(s);
 	}
 	
+	/**
+	 * Return a {@link Graph} that contains all of the vertices of {@code graph}
+	 * whose ids are contained in {@code nodes}, as well as all the edges from
+	 * {@code graph} between two such nodes. The new {@link Graph} is backed by
+	 * the passed-in {@link Graph}, and any modifications to either will be seen
+	 * by the other.
+	 * 
+	 * @param graph The {@link Graph} for which we want to produce a subgraph.
+	 * @param nodes The {@link Set} of ids for the nodes that the subgraph
+	 * should contain.
+	 * @return A {@link Graph} over the indicated subset of nodes.
+	 */
 	static Graph getSubGraph(Graph graph, Set<Integer> nodes) {
 		return new Graph() {
 			@Override
@@ -71,7 +83,7 @@ public abstract class Graph {
 				if (node != null) {
 					nodes.add(node.getId());
 				}
-				return node;
+				return wrapNode(node);
 			}
 
 			@Override
@@ -104,14 +116,37 @@ public abstract class Graph {
 
 			@Override
 			public Node getNode(int i) {
-				return graph.getNode(i);
+				return wrapNode(graph.getNode(i));
 			}
 
 			@Override
 			public Stream<Node> getNodes() {
-				return graph.getNodes().filter(node -> nodes.contains(node));
+				return
+					graph.getNodes()
+						.filter(node -> nodes.contains(node.getId()))
+						.map(this::wrapNode);
 			}
 			
+			private Node wrapNode(Node node) {
+				return new Node(node.getId()) {
+					@Override
+					void addEdge(Node a) {
+						node.addEdge(a);
+					}
+
+					@Override
+					Set<Node> getAdjSet() {
+						return getAdjStream().collect(Collectors.toSet());
+					}
+
+					@Override
+					Stream<Node> getAdjStream() {
+						return
+							node.getAdjStream()
+								.filter(node -> nodes.contains(node.getId()));
+					}
+				};
+			}
 		};
 	}
 	

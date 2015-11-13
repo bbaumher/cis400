@@ -43,25 +43,31 @@ class TransitionMatrix {
   }
 
   /**
-   * Return the matrix product of this matrix with itself.
+   * Return the matrix product of this matrix with itself. Also, normalize each
+   * row to prevent small rounding errors to propagate too far.
    */
   TransitionMatrix square() {
     return
       new TransitionMatrix(
         Arrays.stream(transitionVectors)
           .map(
-            vector ->
-              IntStream.range(0, vector.length)
-                .mapToDouble(
-                  destinationIndex ->
-                    IntStream.range(0, vector.length)
-                      .mapToDouble(
-                        intermediateIndex ->
-                          vector[intermediateIndex]
-                            * transitionVectors[intermediateIndex]
-                                [destinationIndex])
-                      .sum())
-                .toArray())
+            vector -> {
+              double[] result =
+                IntStream.range(0, vector.length)
+                  .mapToDouble(
+                    destinationIndex ->
+                      IntStream.range(0, vector.length)
+                        .mapToDouble(
+                          intermediateIndex ->
+                            vector[intermediateIndex]
+                              * transitionVectors[intermediateIndex]
+                                  [destinationIndex])
+                        .sum())
+                  .toArray();
+              ProbabilityDistributionAlgorithm.normalize(result);
+			  return result;
+            }
+		  )
           .toArray(double[][]::new));
   }
   

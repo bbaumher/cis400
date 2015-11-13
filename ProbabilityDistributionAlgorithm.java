@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -74,33 +75,29 @@ public class ProbabilityDistributionAlgorithm {
 		return result;
 	}
 	
-	static double[][] getTransitionVectors(AdjListGraph graph, int k) {
+	static double[][] getTransitionVectors(Graph graph, int k) {
+		LinkedHashMap<Node, Integer> nodeToIndexMap =
+			new LinkedHashMap<>(graph.getNodeCnt());
+		graph.getNodes()
+			.sorted(
+				(node1, node2) -> Integer.compare(node1.getId(), node2.getId()))
+			.forEachOrdered(
+				node -> nodeToIndexMap.put(node, nodeToIndexMap.size()));
 		return
-			graph.nodeList
+			nodeToIndexMap.entrySet()
 				.stream()
-				.map(node -> getTransitionVector(node, k, graph.getNodeCnt()))
+				.map(
+					entry -> {
+						double[] result = new double[graph.getNodeCnt()];
+						getNeighborVector(entry.getKey(), k).entrySet()
+							.forEach(
+								e ->
+									result[nodeToIndexMap.get(e.getKey())] =
+										e.getValue());
+						return result;
+					}
+				)
 				.toArray(double[][]::new);
-	}
-	
-	/**
-	 * The k credit algorithm.
-	 * 
-	 * @param s the starting node
-	 * @param k we consider nodes up to k away from the starting node
-	 * @param graphNodeCount the number  of nodes in the graph
-	 * @return 
-	 */
-	private static double[] getTransitionVector(
-		Node s,
-		int k,
-		int graphNodeCount)
-	{
-		//perform and return some algorithm to determine credits
-		double[] result = new double[graphNodeCount];
-		getNeighborVector(s, k).entrySet()
-			.forEach(entry -> result[entry.getKey().getId()] = entry.getValue()
-			);
-		return result;
 	}
 	
 	/**
@@ -152,7 +149,7 @@ public class ProbabilityDistributionAlgorithm {
 	/** Normalize an array by scaling each of its entries so that
 	 *  the sum becomes 1. Modifies the array in place.
 	 */
-	private static void normalize(double[] array) {
+	public static void normalize(double[] array) {
 		double sum = sum(array);
 		for (int i = 0; i < array.length; i++) {
 			array[i] = array[i] / sum;
