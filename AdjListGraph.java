@@ -1,5 +1,8 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class AdjListGraph extends Graph { // undirected graph
 	
@@ -12,7 +15,7 @@ public class AdjListGraph extends Graph { // undirected graph
 		nodeCnt = 0;
 		nodeList = new ArrayList<Node>();
 		for (int i = 0; i < n; i++) {
-			nodeList.add(new Node(i));
+			nodeList.add(new AdjListNode(i));
 		}
 	}
 
@@ -29,7 +32,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	
 	@Override
 	public void addNode() {
-		Node node = new Node(nodeCnt);
+		Node node = new AdjListNode(nodeCnt);
 		nodeCnt++;
 		nodeList.add(node);
 	}
@@ -55,7 +58,7 @@ public class AdjListGraph extends Graph { // undirected graph
 		for (Node n : nodeList) { // no self loops
 			System.out.print(n.getId() + ": ");
 			boolean printedAlready = false;
-			for (Node j : n.getAdj()) {
+			for (Node j : (Iterable<Node>) n.getAdjStream()::iterator) {
 				if (printedAlready) {
 					System.out.print(", ");
 				}
@@ -75,7 +78,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	@Override
 	public List<Integer> getNeighbors(int id) {
 		Node node = this.getNode(id);
-		List<Node> neighbors = node.getAdj();
+		Iterable<Node> neighbors = node.getAdjStream()::iterator;
 		List<Integer> neighborIds = new ArrayList<Integer>();
 		for ( Node n : neighbors ) {
 			neighborIds.add(n.getId());	
@@ -84,16 +87,11 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 
 	@Override
-	public List<Node> getNeighbors(Node n) {
-		return n.getAdj();
-	}
-
-	@Override
 	public List<Integer> getInboundNodes(int id) {
 		List<Integer> neighbors = new ArrayList<Integer>();
 		Node node = this.getNode(id);
 		for (Node n : nodeList) {
-			if (n.getAdj().contains(node)) {
+			if (n.getAdjSet().contains(node)) {
 				neighbors.add(n.getId());
 			}
 		}
@@ -104,10 +102,34 @@ public class AdjListGraph extends Graph { // undirected graph
 		List<Node> neighbors = new ArrayList<Node>();
 		
 		for (Node n : nodeList) {
-			if (n.getAdj().contains(node)) {
+			if (n.getAdjSet().contains(node)) {
 				neighbors.add(n);
 			}
 		}
 		return neighbors;
+	}
+	
+	private static final class AdjListNode extends Node {
+		private Set<Node> adjSet;
+
+		public AdjListNode (int id) {
+			super(id);
+			this.adjSet = new HashSet<>();
+		}
+
+		@Override
+		public void addEdge(Node a) {
+			adjSet.add(a);
+		}
+
+		@Override
+		public Set<Node> getAdjSet() {
+			return adjSet;
+		}
+
+		@Override
+		public Stream<Node> getAdjStream() {
+			return getAdjSet().stream();
+		}
 	}
 }

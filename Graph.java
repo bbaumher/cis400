@@ -3,6 +3,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public abstract class Graph {
 	
@@ -20,7 +21,9 @@ public abstract class Graph {
 
 	public abstract List<Integer> getNeighbors(int node);
 	
-	public abstract List<Node> getNeighbors(Node n);
+	public Set<Node> getNeighbors(Node n) {
+		return n.getAdjSet();
+	}
 	
 	public abstract List<Integer> getInboundNodes(int id); 
 	
@@ -48,7 +51,7 @@ public abstract class Graph {
 			nextNode = s;
 			
 			seenNodes.add(s);
-			adjListStack.add(s.getAdj());
+			adjListStack.add(s.getAdjStream().collect(Collectors.toList()));
 			indexStack.add(0);
 		}
 
@@ -83,7 +86,8 @@ public abstract class Graph {
 			}
 			
 			seenNodes.add(potentialNode);
-			adjListStack.add(potentialNode.getAdj());
+			adjListStack.add(
+				potentialNode.getAdjStream().collect(Collectors.toList()));
 			indexStack.add(0);
 			return potentialNode;
 		}

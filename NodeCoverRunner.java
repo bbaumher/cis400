@@ -1,4 +1,6 @@
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class NodeCoverRunner {
@@ -14,20 +16,20 @@ public class NodeCoverRunner {
 		for (int i = 0; true; i++) {
 			if (coveredNodes.size() == g.getNodeCnt()) return i;
 			
-			double[] probDist =
+			Map<Node, Double> probDist =
 				ProbabilityDistributionAlgorithm
 					.getNeighborVector(currentNode, k);
-			currentNode = transition(currentNode, probDist);
+			currentNode = transition(probDist);
 		}
 
 	}
 	
-	private static Node transition(Node v, double[] probDist) {
+	private static Node transition(Map<Node, Double> probDist) {
 		double rand = Math.random();
 		double threshold = 0;
-		for (int i = 0; i < v.getAdj().size(); i++) {
-			Node u = v.getAdj().get(i);
-			double prob = probDist[i];
+		for (Map.Entry<Node, Double> entry : probDist.entrySet()) {
+			Node u = entry.getKey();
+			double prob = entry.getValue();
 			
 			threshold += prob;
 			if (rand < threshold) return u;

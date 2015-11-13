@@ -1,5 +1,7 @@
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * @author Scott
@@ -17,17 +19,19 @@ import java.util.Map;
  */
 
 public class ReferralLog {
-	
-	private final int numNeighbors; //the number of neighbors s has
+	// A Map from the neighbors to the index of that node in the int[]s.
+	private final Map<Node, Integer> neighborToIndexMap = new HashMap<>();
 	Map<Node,int[]> referralMap; //the actual mapping from Node to int[]
 	
-	/** Construct a ReferralLog by storing the number of neighbors and
+	/** Construct a ReferralLog by storing the neighbors and
 	 *  instantiating the map.
 	 * 
-	 * @param numNeighbors the number of neighbors s has
+	 * @param neighbors the neighbors of s
 	 */
-	public ReferralLog (int numNeighbors) {
-		this.numNeighbors = numNeighbors;
+	public ReferralLog (List<Node> neighbors) {
+		IntStream.range(0, neighbors.size())
+			.forEach(
+				index -> neighborToIndexMap.put(neighbors.get(index), index));
 		referralMap = new HashMap<Node,int[]>();
 	}
 	
@@ -40,17 +44,18 @@ public class ReferralLog {
 			return referralMap.get(node);
 		}
 		else { //node doesn't have a referral array yet
-			int[] emptyReferral = new int[numNeighbors];
+			int[] emptyReferral = new int[neighborToIndexMap.size()];
 			referralMap.put(node, emptyReferral);
 			return emptyReferral;
 		}
 	}
 	
-	/** Set the index'th entry of node's referral array to value.
+	/** 
+	 * Set the entry of node's referral array corresponding to centralNeighbor.
 	 */
-	public void setValue(Node node, int index, int value) {
-		int[] values = getReferral(node);
-		values[index] = value;
+	public void setValue(Node fringeNode, Node centralNeighbor, int value) {
+		int[] values = getReferral(fringeNode);
+		values[neighborToIndexMap.get(centralNeighbor)] = value;
 	}
 	
 	/** Add the values of node1's referral array onto the
@@ -59,7 +64,7 @@ public class ReferralLog {
 	public void addValuesOnto(Node node1, Node node2) {
 		int[] node1ref = getReferral(node1);
 		int[] node2ref = getReferral(node2);
-		for (int i = 0; i < numNeighbors; i++) {
+		for (int i = 0; i < neighborToIndexMap.size(); i++) {
 			node2ref[i] = node1ref[i] + node2ref[i];
 		}
 	}

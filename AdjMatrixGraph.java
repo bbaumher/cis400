@@ -1,5 +1,10 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 public class AdjMatrixGraph extends Graph{
@@ -27,7 +32,6 @@ public class AdjMatrixGraph extends Graph{
 	// shouldn't be able to add a node, would have to change array size....
 	@Override
 	public void addNode() {
-		Node node = new Node(nodeCnt);
 		nodeCnt++;
 	}
 	
@@ -56,10 +60,6 @@ public class AdjMatrixGraph extends Graph{
 		}
 		
 		return neighbors;	
-	}
-	
-	public List<Node> getNeighbors(Node n) {
-		return n.getAdj();
 	}
 	
 	
@@ -93,8 +93,26 @@ public class AdjMatrixGraph extends Graph{
 
 	@Override
 	public Node getNode(int i) {
-		// this method doesn't make much sense for adj matrix graphs
-		return null;
+		return new Node(i) {
+			@Override
+			void addEdge(Node a) {
+				AdjMatrixGraph.this.addEdge(this, a);
+			}
+
+			@Override
+			Set<Node> getAdjSet() {
+				return
+					getAdjStream()
+						.collect(Collectors.toCollection(HashSet::new));
+			}
+
+			@Override
+			Stream<Node> getAdjStream() {
+				return
+					IntStream.range(0, nodes).filter(j -> adjMatrix[i][j] != 0)
+						.mapToObj(AdjMatrixGraph.this::getNode);
+			}
+		};
 	}
 	
 

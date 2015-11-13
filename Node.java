@@ -1,10 +1,9 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
-public class Node {
+public abstract class Node {
 	
 	int id;
-	private List<Node> adjList;
 	
 	public Node (String info) {
 		
@@ -12,7 +11,6 @@ public class Node {
 	
 	public Node (int id) {
 		this.id = id;
-		this.adjList = new ArrayList<Node>();
 	}
 
 	
@@ -24,15 +22,11 @@ public class Node {
 		return id;
 	}
 	
-	public void addEdge(Node a) {
-		adjList.add(a);
-	}
+	abstract void addEdge(Node a);
 	
-	public List<Node> getAdj() {
-		return adjList;
-	}
+	abstract Set<Node> getAdjSet();
 
-
+	abstract Stream<Node> getAdjStream();
 
 	@Override
 	public boolean equals(Object obj) {

@@ -1,9 +1,12 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProbabilityDistributionAlgorithm {
 	/**
@@ -13,18 +16,18 @@ public class ProbabilityDistributionAlgorithm {
 	 * @param k we consider nodes up to k away from the starting node
 	 * @return 
 	 */
-	public static double[] getNeighborVector(Node s, int k) {
+	public static Map<Node, Double> getNeighborVector(Node s, int k) {
 		Set<Node> seenNodes = new HashSet<Node>(); //the nodes that no longer need to be considered
 		Queue<Node> nodeQueue = new LinkedList<Node>(); //the nodes on the current layer of the BFS
 		Set<Node> pendingNodes = new HashSet<Node>(); //the the nodes being discovered on the edge of the BFS
-		int neighborCount = s.getAdj().size(); //the number of neighbors of the starting node
+		List<Node> adjList = s.getAdjStream().collect(Collectors.toList()); //the number of neighbors of the starting node
 		ArrayList<Set<Node>> nodeTiers = new ArrayList<Set<Node>>(); //a list of sets of nodes, each set containing nodes i away from s
-		ReferralLog referralLog = new ReferralLog(neighborCount); //a map from each node to its referral array
+		ReferralLog referralLog = new ReferralLog(adjList); //a map from each node to its referral array
 		
 		//give each of s's neighbors a 1 in its corresponding referral array
-		for (int i = 0; i < s.getAdj().size(); i++) {
-			Node v = s.getAdj().get(i);
-			referralLog.setValue(v, i, 1);
+		for (int i = 0; i < adjList.size(); i++) {
+			Node v = adjList.get(i);
+			referralLog.setValue(v, adjList.get(i), 1);
 			pendingNodes.add(v);
 		}
 		
@@ -46,7 +49,7 @@ public class ProbabilityDistributionAlgorithm {
 				Node v = nodeQueue.poll();
 				
 				//examine each of the node's neighbors
-				for (Node u : v.getAdj()) {
+				for (Node u : (Iterable<Node>) v.getAdjStream()::iterator) {
 					if (seenNodes.contains(u)) continue; //if we've seen it before, skip it
 					else {//otherwise, we haven't seen it yet
 						pendingNodes.add(u); //add it to the pending nodes (possibly redundantly)
@@ -60,9 +63,15 @@ public class ProbabilityDistributionAlgorithm {
 		nodeTiers.add(pendingNodes);
 		
 		//perform and return some algorithm to determine credits
-		double[] p = calculateCredits(nodeTiers, referralLog, neighborCount, k);
+		double[] p =
+			calculateCredits(nodeTiers, referralLog, adjList.size(), k);
 		
-		return p;
+		Map<Node, Double> result = new HashMap<>(adjList.size());
+		int index = 0;
+		for (Node node : adjList) {
+			result.put(node, p[index++]);
+		}
+		return result;
 	}
 	
 	static double[][] getTransitionVectors(AdjListGraph graph, int k) {
@@ -81,20 +90,16 @@ public class ProbabilityDistributionAlgorithm {
 	 * @param graphNodeCount the number  of nodes in the graph
 	 * @return 
 	 */
-	private static double[] getTransitionVector(Node s, int k, int graphNodeCount
-	) {
-		List<Node> adjacencyList = s.getAdj();
-		
+	private static double[] getTransitionVector(
+		Node s,
+		int k,
+		int graphNodeCount)
+	{
 		//perform and return some algorithm to determine credits
-		double[] p = getNeighborVector(s, k);
 		double[] result = new double[graphNodeCount];
-		for (
-			int neighborIndex = p.length - 1;
-			neighborIndex >= 0;
-			neighborIndex--)
-		{
-			result[adjacencyList.get(neighborIndex).getId()] = p[neighborIndex];
-		}
+		getNeighborVector(s, k).entrySet()
+			.forEach(entry -> result[entry.getKey().getId()] = entry.getValue()
+			);
 		return result;
 	}
 	
