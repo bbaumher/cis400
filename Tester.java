@@ -181,12 +181,13 @@ public class Tester {
 	private static void compareAlgorithms() {
 		int nodeCount = 1000;
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
-		Graph graph =
-			getLargestStronglyConnectedComponent(
-				new StandardGraphGenerator(RANDOM)
-					.generateAdjListGraph(
-						nodeCount,
-						logSize / (float) nodeCount));
+//		Graph graph =
+//			getLargestStronglyConnectedComponent(
+//				new StandardGraphGenerator(RANDOM)
+//					.generateAdjListGraph(
+//						nodeCount,
+//						logSize / (float) nodeCount));
+		Graph graph = LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
 		List<ConvergenceTester> testers = new ArrayList<>(4);
 		testers.add(
