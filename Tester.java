@@ -1,13 +1,23 @@
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 
 public class Tester {
+	private static final Random RANDOM = new Random();
+	
+	public static void main(String[] args) {
+		compareAlgorithms();
+	}
 	
 	/** Run the algorithm on a test graph.
 	 */
-	public static void main3(String[] args) {
-		GraphGenerator gg = new StandardGraphGenerator();
+	public static void main4(String[] args) {
+		GraphGenerator gg = new StandardGraphGenerator(RANDOM);
 		Graph testGraph;
 		int k = 4;
 		
@@ -15,12 +25,14 @@ public class Tester {
 		//System.out.println(SCCTester.isStronglyConnected(testGraph));
 		for (int i = 1; i <= 100; i++) {
 			testGraph = gg.generateAdjListGraph(1000, 0.010);
-			int coverTime = NodeCoverRunner.getCoverTime(testGraph, testGraph.getNode(0), k);
+			int coverTime =
+				new NodeCoverRunner(RANDOM)
+					.getCoverTime(testGraph, testGraph.getNode(0), k);
 			System.out.println(i + "\t" + coverTime);
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main3(String[] args) {
 		//create nodes
 		int s = 0;
 		int a = 1;
@@ -93,28 +105,19 @@ public class Tester {
 		}
 		
 		Graph graph =
-			new StandardGraphGenerator().generateAdjListGraph(20, 0.2);
+			new StandardGraphGenerator(RANDOM).generateAdjListGraph(20, 0.2);
 		graph.printGraph();
-		Graph largestComponent = null;
-		Iterator<Graph> iterator =
-			SCCTester.getStronglyConnectedComponents(graph);
-		while (iterator.hasNext()) {
-			Graph component = iterator.next();
-			if (
-				largestComponent == null
-					|| largestComponent.getNodeCnt()
-						< component.getNodeCnt())
-			{
-				largestComponent = component;
-			}
-		}
+		Graph largestComponent = getLargestStronglyConnectedComponent(graph);
 		
 		largestComponent.printGraph();
 		
 		//run the algorithm
 		TransitionMatrix transitionMatrix =
 			ProbabilityDistributionAlgorithm
-				.getTransitionMatrix(largestComponent, 3);
+				.getTransitionMatrix(
+					largestComponent,
+					3,
+					ProbabilityDistributionAlgorithm::calculateCredits);
 		
 		//display the output
 		print(transitionMatrix.getTransitionVectors());
@@ -153,4 +156,68 @@ public class Tester {
 		System.out.println();
 	}
 	
+	/**
+	 * Return a {@link Graph} representing the largest strongly-connected
+	 * component of the specified {@link Graph}.
+	 * 
+	 * @param graph The original graph.
+	 * @return {@code graph}'s largest strongly connected component.
+	 */
+	private static Graph getLargestStronglyConnectedComponent(Graph graph) {
+		Iterable<Graph> iterable =
+			() -> SCCTester.getStronglyConnectedComponents(graph);
+		return
+			StreamSupport.stream(iterable.spliterator(), false)
+				.sorted(
+					(component1, component2) ->
+						Integer
+							.compare(
+								component1.getNodeCnt(),
+								component2.getNodeCnt()))
+				.findFirst()
+				.get();
+	}
+	
+	private static void compareAlgorithms() {
+		int nodeCount = 1000;
+		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
+		Graph graph =
+			getLargestStronglyConnectedComponent(
+				new StandardGraphGenerator(RANDOM)
+					.generateAdjListGraph(
+						nodeCount,
+						logSize / (float) nodeCount));
+		System.out.println(graph.getNodeCnt());
+		List<ConvergenceTester> testers = new ArrayList<>(4);
+		testers.add(
+			ConvergenceTester.forTransitionMatrix(
+				UniformDistributionAlgorithm.getTransitionMatrix(graph)));
+		Consumer<ProbabilityDistributionAlgorithm.CreditCalculator> addTester =
+			calculator ->
+				testers.add(
+					ConvergenceTester.forTransitionMatrix(
+						ProbabilityDistributionAlgorithm
+							.getTransitionMatrix(graph, logSize, calculator)));
+		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
+		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
+		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits3);
+		System.out.println(
+			"Log steps;"
+				+ "Standard random walk;"
+				+ "Exactly k away;"
+				+ "Up to k away;"
+				+ "Up to k away, proportional to distance");
+		int logSteps = 0;
+		while (true) {
+			System.out.print(logSteps++);
+			for (ConvergenceTester tester : testers) {
+				if (logSteps > 1) {
+					tester.iterateDistributions(1);
+				}
+				System.out.print(';');
+				System.out.print(tester.convergenceDistance());
+			}
+			System.out.println();
+		}
+	}
 }

@@ -1,8 +1,12 @@
 
+import java.util.Random;
+
+
 public class StandardGraphGenerator implements GraphGenerator {
+	private final Random random;
 	
-	public StandardGraphGenerator() {
-		
+	public StandardGraphGenerator(Random random) {
+		this.random = random;
 	}
 
 	@Override
@@ -34,7 +38,7 @@ public class StandardGraphGenerator implements GraphGenerator {
 				if (i == j) {
 					continue;  // no self loops, can change this
 				}
-				double d = Math.random();
+				double d = random.nextDouble();
 				if (d < p) {
 					try {
 						g.addEdge(i,j);

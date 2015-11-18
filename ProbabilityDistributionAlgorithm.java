@@ -1,13 +1,11 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ProbabilityDistributionAlgorithm {
 	/**
@@ -15,9 +13,15 @@ public class ProbabilityDistributionAlgorithm {
 	 * 
 	 * @param s the starting node
 	 * @param k we consider nodes up to k away from the starting node
+	 * @param creditCalculator The function used to compute the transition
+	 * probabilities after the traversal is complete.
 	 * @return 
 	 */
-	public static Map<Node, Double> getNeighborVector(Node s, int k) {
+	public static Map<Node, Double> getNeighborVector(
+		Node s,
+		int k,
+		CreditCalculator creditCalculator)
+	{
 		Set<Node> seenNodes = new HashSet<Node>(); //the nodes that no longer need to be considered
 		Queue<Node> nodeQueue = new LinkedList<Node>(); //the nodes on the current layer of the BFS
 		Set<Node> pendingNodes = new HashSet<Node>(); //the the nodes being discovered on the edge of the BFS
@@ -67,6 +71,7 @@ public class ProbabilityDistributionAlgorithm {
 		//perform and return some algorithm to determine credits
 		double[] p =
 			calculateCredits4(nodeTiers, referralLog, adjList.size(), k);
+			creditCalculator.apply(nodeTiers, referralLog, adjList.size(), k);
 		
 		Map<Node, Double> result = new HashMap<>(adjList.size());
 		int index = 0;
@@ -81,14 +86,21 @@ public class ProbabilityDistributionAlgorithm {
 	 * 
 	 * @param graph the graph on which to run the algorithm
 	 * @param k we consider nodes up to k away from the starting node
+	 * @param creditCalculator The function used to compute the transition
+	 * probabilities after the traversal is complete.
 	 * @return A {@link TransitionMatrix} for the Markov chain.
 	 */
-	static TransitionMatrix getTransitionMatrix(Graph graph, int k) {
+	static TransitionMatrix getTransitionMatrix(
+		Graph graph,
+		int k,
+		CreditCalculator creditCalculator)
+	{
 		return
 			TransitionMatrix.fromProbabilityRetriever(
 				graph.getNodes(),
 				source -> {
-					Map<Node, Double> map = getNeighborVector(source, k);
+					Map<Node, Double> map =
+						getNeighborVector(source, k, creditCalculator);
 					return target -> map.getOrDefault(target, 0d);
 				}
 			);
@@ -103,7 +115,7 @@ public class ProbabilityDistributionAlgorithm {
 	 * @param k we consider nodes up to k away from the starting node
 	 * @return the probability distribution for going to s's neighbors
 	 */
-	private static double[] calculateCredits(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits(ArrayList<Set<Node>> nodeTiers, 
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		Set<Node> edgeNodes = nodeTiers.get(k); //get the final tier (i.e. nodes exactly k away from s)
@@ -122,7 +134,7 @@ public class ProbabilityDistributionAlgorithm {
 	
 	/** All tiers give out credits.
 	 */
-	private static double[] calculateCredits2(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits2(ArrayList<Set<Node>> nodeTiers, 
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		
@@ -143,7 +155,7 @@ public class ProbabilityDistributionAlgorithm {
 	
 	/** All tiers give out credits, but proportionally to their distance away.
 	 */
-	private static double[] calculateCredits3(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits3(ArrayList<Set<Node>> nodeTiers, 
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		
@@ -164,7 +176,7 @@ public class ProbabilityDistributionAlgorithm {
 	
 	/** A control algorithm. It's a standard random walk.
 	 */
-	private static double[] calculateCredits4(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits4(ArrayList<Set<Node>> nodeTiers, 
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		normalize(p); //normalize the probability vector
@@ -202,5 +214,16 @@ public class ProbabilityDistributionAlgorithm {
 		}
 	}
 
-
+	/**
+	 * An interface for functions that can be used in {@link #getNeighborVector}
+	 * to produce probability distributions using the k-away system.
+	 */
+	@FunctionalInterface
+	static interface CreditCalculator {
+		double[] apply(
+			ArrayList<Set<Node>> nodeTiers, 
+			ReferralLog referralLog,
+			int neighborCount,
+			int k);
+	}
 }

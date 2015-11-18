@@ -1,13 +1,19 @@
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class NodeCoverRunner {
 	
 	private static final double COVER_THRESHOLD = 0.99; //proportion of nodes to cover
+	
+	private final Random random;
+	
+	NodeCoverRunner(Random random) {
+		this.random = random;
+	}
 		
-	public static int getCoverTime(Graph g, Node s, int k) {
+	public int getCoverTime(Graph g, Node s, int k) {
 		
 		Set<Node> coveredNodes = new HashSet<Node>();
 		coveredNodes.add(s);
@@ -21,7 +27,10 @@ public class NodeCoverRunner {
 			
 			Map<Node, Double> probDist =
 				ProbabilityDistributionAlgorithm
-					.getNeighborVector(currentNode, k);
+					.getNeighborVector(
+						currentNode,
+						k,
+						ProbabilityDistributionAlgorithm::calculateCredits);
 			currentNode = transition(probDist);
 			
 			if (!coveredNodes.contains(currentNode)) {
@@ -35,8 +44,8 @@ public class NodeCoverRunner {
 
 	}
 	
-	private static Node transition(Map<Node, Double> probDist) {
-		double rand = Math.random();
+	private Node transition(Map<Node, Double> probDist) {
+		double rand = random.nextDouble();
 		double threshold = 0;
 		for (Map.Entry<Node, Double> entry : probDist.entrySet()) {
 			Node u = entry.getKey();

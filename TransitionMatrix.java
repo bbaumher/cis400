@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
@@ -31,7 +32,10 @@ class TransitionMatrix {
   
   /**
    * Determine the {@link TransitionMatrix} for a graph by using a nested
-   * function to query node transition probabilities.
+   * function to query node transition probabilities. In effect, this discards
+   * the knowledge about which probability corresponds to which nodes. However,
+   * for debugging purposes, the order of the rows and columns will be the
+   * numerical order of the node ids.
    * 
    * @param nodes A {@link Stream} returning the {@link Node}s for which to
    * build the {@link TransitionMatrix} (presumably all {@link Node}s in the
@@ -61,6 +65,30 @@ class TransitionMatrix {
   }
   
   /**
+   * Construct a {@link TransitionMatrix} corresponding to the transition
+   * probabilities given in the maps. In effect, this discards the knowledge
+   * about which probability corresponds to which nodes. However, for debugging
+   * purposes, the order of the rows and columns will be the numerical order of
+   * the node ids.
+   * 
+   * @param transitionMaps The info about transition probabilities.
+   * {@code transitionMaps.get(i).get(j)} should return the probability of going
+   * to {@link Node} {@code j} after being at {@link Node} {@code i}.
+   */
+  static TransitionMatrix fromTransitionMaps(
+    Map<Node, Map<Node, Double>> transitionMaps)
+  {
+    return
+		fromProbabilityRetriever(
+			transitionMaps.keySet().stream(),
+			source -> {
+				Map<Node, Double> map = transitionMaps.get(source);
+				return target -> map.getOrDefault(target, 0d);
+			}
+		);
+  }
+  
+  /**
    * Return a deep copy of the given array.
    */
   private static double[][] copy(double[][] array) {
@@ -85,6 +113,7 @@ class TransitionMatrix {
     return
       new TransitionMatrix(
         Arrays.stream(transitionVectors)
+		  .parallel()
           .map(
             vector -> {
               double[] result =
