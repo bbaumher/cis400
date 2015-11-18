@@ -1,8 +1,12 @@
 import java.util.Arrays;
-import java.util.function.IntFunction;
+import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * A class representing a transition matrix in a Markov chain.
@@ -23,6 +27,37 @@ class TransitionMatrix {
    */
   static TransitionMatrix fromTransitionVectors(double[][] transitionVectors) {
     return new TransitionMatrix(copy(transitionVectors));
+  }
+  
+  /**
+   * Determine the {@link TransitionMatrix} for a graph by using a nested
+   * function to query node transition probabilities.
+   * 
+   * @param nodes A {@link Stream} returning the {@link Node}s for which to
+   * build the {@link TransitionMatrix} (presumably all {@link Node}s in the
+   * graph).
+   * @param probabilityRetriever A {@link Function} that takes in the source
+   * {@link Node} and returns a {@link ToDoubleFunction} for computing the
+   * probability of transitioning to each target {@link Node}.
+   * @return The {@link TransitionMatrix} constructed for the provided
+   * parameters.
+   */
+  static TransitionMatrix fromProbabilityRetriever(
+    Stream<Node> nodes,
+    Function<Node, ToDoubleFunction<Node>> probabilityRetriever)
+  {
+    List<Node> orderedNodes =
+      // Sorting by ID is unnecessary but makes debugging easier.
+      nodes.sorted(
+          (node1, node2) -> Integer.compare(node1.getId(), node2.getId()))
+        .collect(Collectors.toList());
+	return
+      new TransitionMatrix(
+        orderedNodes.stream()
+		  .map(probabilityRetriever)
+          .map(
+            function -> orderedNodes.stream().mapToDouble(function).toArray())
+          .toArray(double[][]::new));
   }
   
   /**

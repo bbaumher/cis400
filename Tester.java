@@ -84,19 +84,19 @@ public class Tester {
 		largestComponent.printGraph();
 		
 		//run the algorithm
-		double[][] transitionVectors =
+		TransitionMatrix transitionMatrix =
 			ProbabilityDistributionAlgorithm
-				.getTransitionVectors(largestComponent, 3);
+				.getTransitionMatrix(largestComponent, 3);
 		
 		//display the output
-		print(transitionVectors);
+		print(transitionMatrix.getTransitionVectors());
 		
 		System.out.println(
-			ConvergenceTester.forTransitionMatrix(transitionVectors)
+			ConvergenceTester.forTransitionMatrix(transitionMatrix)
 				.logStepsForConvergence(0.125));
 		
 		ConvergenceTester convergenceTester =
-			ConvergenceTester.forTransitionMatrix(transitionVectors);
+			ConvergenceTester.forTransitionMatrix(transitionMatrix);
 			
 		int iteration = 1;
 		while (true) {
