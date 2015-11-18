@@ -6,17 +6,45 @@ public class Tester {
 	
 	/** Run the algorithm on a test graph.
 	 */
-	public static void main(String[] args) {
+	public static void main3(String[] args) {
 		GraphGenerator gg = new StandardGraphGenerator();
-		Graph testGraph = gg.generateAdjListGraph(1000, 0.010);
+		Graph testGraph;
 		int k = 4;
 		
 		//System.out.println(testGraph);
 		//System.out.println(SCCTester.isStronglyConnected(testGraph));
 		for (int i = 1; i <= 100; i++) {
+			testGraph = gg.generateAdjListGraph(1000, 0.010);
 			int coverTime = NodeCoverRunner.getCoverTime(testGraph, testGraph.getNode(0), k);
 			System.out.println(i + "\t" + coverTime);
 		}
+	}
+	
+	public static void main(String[] args) {
+		//create nodes
+		int s = 0;
+		int a = 1;
+		int b = 2;
+		int c = 3;
+		
+		//create graph
+		AdjListGraph testGraph = new AdjListGraph(4);
+		
+		//add edges to the graph
+		testGraph.addEdge(s,a);
+		testGraph.addEdge(a,b);
+		testGraph.addEdge(b,c);
+		testGraph.addEdge(c,s);
+		
+		int counter = 0;
+		Iterator<Graph> iter = SCCTester.getStronglyConnectedComponents(testGraph);
+		while (iter.hasNext()) {
+			Graph g = iter.next();
+			System.out.println("graph " + counter + ": ");
+			g.printGraph();
+			counter++;
+		}
+		System.out.println(iter + " graphs in total");
 	}
 	
 	/** Run the algorithm on a test graph.

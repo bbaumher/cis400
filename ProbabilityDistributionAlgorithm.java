@@ -66,7 +66,7 @@ public class ProbabilityDistributionAlgorithm {
 		
 		//perform and return some algorithm to determine credits
 		double[] p =
-			calculateCredits(nodeTiers, referralLog, adjList.size(), k);
+			calculateCredits4(nodeTiers, referralLog, adjList.size(), k);
 		
 		Map<Node, Double> result = new HashMap<>(adjList.size());
 		int index = 0;
