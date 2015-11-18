@@ -7,6 +7,21 @@ public class Tester {
 	/** Run the algorithm on a test graph.
 	 */
 	public static void main(String[] args) {
+		GraphGenerator gg = new StandardGraphGenerator();
+		Graph testGraph = gg.generateAdjListGraph(1000, 0.010);
+		int k = 4;
+		
+		//System.out.println(testGraph);
+		//System.out.println(SCCTester.isStronglyConnected(testGraph));
+		for (int i = 1; i <= 100; i++) {
+			int coverTime = NodeCoverRunner.getCoverTime(testGraph, testGraph.getNode(0), k);
+			System.out.println(i + "\t" + coverTime);
+		}
+	}
+	
+	/** Run the algorithm on a test graph.
+	 */
+	public static void main2(String[] args) {
 		//create nodes
 		int s = 0;
 		int a = 1;

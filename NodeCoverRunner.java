@@ -5,21 +5,32 @@ import java.util.Set;
 
 public class NodeCoverRunner {
 	
-	private final static int k = 3;
-	
-	public static int run(Graph g, Node s) {
+	private static final double COVER_THRESHOLD = 0.99; //proportion of nodes to cover
+		
+	public static int getCoverTime(Graph g, Node s, int k) {
 		
 		Set<Node> coveredNodes = new HashSet<Node>();
 		coveredNodes.add(s);
 		Node currentNode = s;
 		
+		long startTime = System.currentTimeMillis();
 		for (int i = 0; true; i++) {
-			if (coveredNodes.size() == g.getNodeCnt()) return i;
+			if (coveredNodes.size() >= COVER_THRESHOLD * g.getNodeCnt()) {
+				return i;
+			}
 			
 			Map<Node, Double> probDist =
 				ProbabilityDistributionAlgorithm
 					.getNeighborVector(currentNode, k);
 			currentNode = transition(probDist);
+			
+			if (!coveredNodes.contains(currentNode)) {
+				coveredNodes.add(currentNode);
+				//System.out.println(coveredNodes.size());
+			}
+			
+			long currentTime = System.currentTimeMillis();
+			if (currentTime - startTime > 30 * 1000) return i;
 		}
 
 	}

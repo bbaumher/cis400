@@ -21,7 +21,8 @@ public class ProbabilityDistributionAlgorithm {
 		Set<Node> seenNodes = new HashSet<Node>(); //the nodes that no longer need to be considered
 		Queue<Node> nodeQueue = new LinkedList<Node>(); //the nodes on the current layer of the BFS
 		Set<Node> pendingNodes = new HashSet<Node>(); //the the nodes being discovered on the edge of the BFS
-		List<Node> adjList = s.getAdjStream().collect(Collectors.toList()); //the number of neighbors of the starting node
+		List<Node> adjList = new ArrayList<Node>(); //the number of neighbors of the starting node
+		adjList.addAll(s.getAdjSet());
 		ArrayList<Set<Node>> nodeTiers = new ArrayList<Set<Node>>(); //a list of sets of nodes, each set containing nodes i away from s
 		ReferralLog referralLog = new ReferralLog(adjList); //a map from each node to its referral array
 		
@@ -126,6 +127,57 @@ public class ProbabilityDistributionAlgorithm {
 		return p;
 	}
 	
+	/** All tiers give out credits.
+	 */
+	private static double[] calculateCredits2(ArrayList<Set<Node>> nodeTiers, 
+			ReferralLog referralLog, int neighborCount, int k) {
+		double[] p = new double[neighborCount]; //instantiate the output array
+		
+		for (int t = 2; t <= k; t++) {
+			Set<Node> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
+			//each node has 1 credit, which is split proportionally to its referrals
+			for (Node v : tier) {
+				int[] referrals = referralLog.getReferral(v);
+				for (int i = 0; i < referrals.length; i++) {
+					double sum = sum(referrals);
+					p[i] += referrals[i] / sum;
+				}
+			}
+		}
+		normalize(p); //normalize the probability vector
+		return p;
+	}
+	
+	/** All tiers give out credits, but proportionally to their distance away.
+	 */
+	private static double[] calculateCredits3(ArrayList<Set<Node>> nodeTiers, 
+			ReferralLog referralLog, int neighborCount, int k) {
+		double[] p = new double[neighborCount]; //instantiate the output array
+		
+		for (int t = 2; t <= k; t++) {
+			Set<Node> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
+			//each node has 1 credit, which is split proportionally to its referrals
+			for (Node v : tier) {
+				int[] referrals = referralLog.getReferral(v);
+				for (int i = 0; i < referrals.length; i++) {
+					double sum = sum(referrals);
+					p[i] += referrals[i] / sum * t;
+				}
+			}
+		}
+		normalize(p); //normalize the probability vector
+		return p;
+	}
+	
+	/** A control algorithm. It's a standard random walk.
+	 */
+	private static double[] calculateCredits4(ArrayList<Set<Node>> nodeTiers, 
+			ReferralLog referralLog, int neighborCount, int k) {
+		double[] p = new double[neighborCount]; //instantiate the output array
+		normalize(p); //normalize the probability vector
+		return p;
+	}
+	
 	/** Return the sum of an integer array.
 	 */
 	private static int sum(int[] array) {
@@ -152,7 +204,8 @@ public class ProbabilityDistributionAlgorithm {
 	public static void normalize(double[] array) {
 		double sum = sum(array);
 		for (int i = 0; i < array.length; i++) {
-			array[i] = array[i] / sum;
+			if (sum == 0) array[i] = 1.0 / array.length;
+			else array[i] = array[i] / sum;
 		}
 	}
 

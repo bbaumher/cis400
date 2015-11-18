@@ -26,7 +26,11 @@ public class StandardGraphGenerator implements GraphGenerator {
 	private void fillInEdges (Graph g, double p) {
 		
 		for (int i = 0; i < g.getNodeCnt(); i++) { 
-			for (int j = 0; j < g.getNodeCnt(); j++) { // directed graphs!!
+			int edgesAdded = 0;
+			
+			//ensure that every node has at least one outgoing edge by continuing to loop
+			for (int j = 0; j < g.getNodeCnt() || edgesAdded == 0; j++) { // directed graphs!!
+				j %= g.getNodeCnt();
 				if (i == j) {
 					continue;  // no self loops, can change this
 				}
@@ -34,6 +38,7 @@ public class StandardGraphGenerator implements GraphGenerator {
 				if (d < p) {
 					try {
 						g.addEdge(i,j);
+						edgesAdded++;
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

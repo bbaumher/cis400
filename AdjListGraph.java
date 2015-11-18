@@ -114,4 +114,22 @@ public class AdjListGraph extends Graph { // undirected graph
 			return getAdjSet().stream();
 		}
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer output = new StringBuffer();
+		for (Node v : nodeList) {
+			output.append(v + ": ");
+			boolean printedAlready = false;
+			for (Node u : v.getAdjSet()) {
+				if (printedAlready) {
+					output.append(", ");
+				}
+				output.append(u);
+				printedAlready = true;
+			}
+			output.append("\n");
+		}
+		return output.toString();
+	}
 }
