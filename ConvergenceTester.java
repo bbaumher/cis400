@@ -63,4 +63,23 @@ final class ConvergenceTester {
 	double convergenceDistance() {
 		return transitionMatrix.distributionRange();
 	}
+	
+	/**
+	 * Compute the ceiling of the log of the number of steps needed to force the
+	 * distribution to converge within the specified margin of error.
+	 * 
+	 * @param convergenceDistance The maximum permitted range in the probability
+	 * of any state when starting from different distributions and running the
+	 * Markov chain the computed number of times.
+	 * @return The log_2 of the number of steps we need to run the Markov chain
+	 * to get within the specified error.
+	 */
+	int logStepsForConvergence(double convergenceDistance) {
+		int result = 0;
+		while (transitionMatrix.distributionRange() > convergenceDistance) {
+			transitionMatrix = transitionMatrix.square();
+			result++;
+		}
+		return result;
+	}
 }

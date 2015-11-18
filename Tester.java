@@ -76,6 +76,10 @@ public class Tester {
 		//display the output
 		print(transitionVectors);
 		
+		System.out.println(
+			ConvergenceTester.forTransitionMatrix(transitionVectors)
+				.logStepsForConvergence(0.125));
+		
 		ConvergenceTester convergenceTester =
 			ConvergenceTester.forTransitionMatrix(transitionVectors);
 			
