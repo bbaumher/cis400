@@ -75,29 +75,22 @@ public class ProbabilityDistributionAlgorithm {
 		return result;
 	}
 	
-	static double[][] getTransitionVectors(Graph graph, int k) {
-		LinkedHashMap<Node, Integer> nodeToIndexMap =
-			new LinkedHashMap<>(graph.getNodeCnt());
-		graph.getNodes()
-			.sorted(
-				(node1, node2) -> Integer.compare(node1.getId(), node2.getId()))
-			.forEachOrdered(
-				node -> nodeToIndexMap.put(node, nodeToIndexMap.size()));
+	/**
+	 * The k credit algorithm.
+	 * 
+	 * @param graph the graph on which to run the algorithm
+	 * @param k we consider nodes up to k away from the starting node
+	 * @return A {@link TransitionMatrix} for the Markov chain.
+	 */
+	static TransitionMatrix getTransitionMatrix(Graph graph, int k) {
 		return
-			nodeToIndexMap.entrySet()
-				.stream()
-				.map(
-					entry -> {
-						double[] result = new double[graph.getNodeCnt()];
-						getNeighborVector(entry.getKey(), k).entrySet()
-							.forEach(
-								e ->
-									result[nodeToIndexMap.get(e.getKey())] =
-										e.getValue());
-						return result;
-					}
-				)
-				.toArray(double[][]::new);
+			TransitionMatrix.fromProbabilityRetriever(
+				graph.getNodes(),
+				source -> {
+					Map<Node, Double> map = getNeighborVector(source, k);
+					return target -> map.getOrDefault(target, 0d);
+				}
+			);
 	}
 	
 	/**
