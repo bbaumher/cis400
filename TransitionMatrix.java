@@ -113,6 +113,7 @@ class TransitionMatrix {
     return
       new TransitionMatrix(
         Arrays.stream(transitionVectors)
+		  .parallel()
           .map(
             vector -> {
               double[] result =
