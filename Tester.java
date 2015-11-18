@@ -86,7 +86,10 @@ public class Tester {
 		//run the algorithm
 		TransitionMatrix transitionMatrix =
 			ProbabilityDistributionAlgorithm
-				.getTransitionMatrix(largestComponent, 3);
+				.getTransitionMatrix(
+					largestComponent,
+					3,
+					ProbabilityDistributionAlgorithm::calculateCredits);
 		
 		//display the output
 		print(transitionMatrix.getTransitionVectors());

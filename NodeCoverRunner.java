@@ -21,7 +21,10 @@ public class NodeCoverRunner {
 			
 			Map<Node, Double> probDist =
 				ProbabilityDistributionAlgorithm
-					.getNeighborVector(currentNode, k);
+					.getNeighborVector(
+						currentNode,
+						k,
+						ProbabilityDistributionAlgorithm::calculateCredits);
 			currentNode = transition(probDist);
 			
 			if (!coveredNodes.contains(currentNode)) {
