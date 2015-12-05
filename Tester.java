@@ -11,7 +11,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		testLollipop();
+		testZeroWeights();
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -176,6 +176,22 @@ public class Tester {
 								component2.getNodeCnt()))
 				.findFirst()
 				.get();
+	}
+	
+	private static void testZeroWeights() {
+		Graph graph = new AdjListGraph(4);
+		graph.addEdge(0, 1);
+		graph.addEdge(0, 2);
+		graph.addEdge(1, 2);
+		graph.addEdge(2, 3);
+		graph.addEdge(3, 0);
+		TransitionMatrix transitionMatrix =
+			ProbabilityDistributionAlgorithm
+				.getTransitionMatrix(
+					graph,
+					2,
+					ProbabilityDistributionAlgorithm::calculateCredits);
+		print(transitionMatrix.getTransitionVectors());
 	}
 	
 	private static void testLollipop() {
