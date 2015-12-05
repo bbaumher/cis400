@@ -11,7 +11,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		compareAlgorithms();
+		testLollipop();
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -176,6 +176,19 @@ public class Tester {
 								component2.getNodeCnt()))
 				.findFirst()
 				.get();
+	}
+	
+	private static void testLollipop() {
+		int nodeCount = 10;
+		int k = 2;
+		Graph graph = LollipopGraphGenerator.generateAdjListGraph(nodeCount);
+		TransitionMatrix transitionMatrix =
+			ProbabilityDistributionAlgorithm
+				.getTransitionMatrix(
+					graph,
+					k,
+					ProbabilityDistributionAlgorithm::calculateCredits);
+		print(transitionMatrix.getTransitionVectors());
 	}
 	
 	private static void compareAlgorithms() {
