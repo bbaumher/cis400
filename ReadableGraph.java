@@ -1,13 +1,15 @@
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class ReadableGraph {
+public abstract class ReadableGraph<T> {
   public void search() {
 		//TODO
 	}
@@ -18,19 +20,19 @@ public abstract class ReadableGraph {
 		System.out.println("Node size: " + getNodeCnt());
 
 		for (
-      Iterator<? extends ReadableNode> iterator = getNodes().iterator();
+      Iterator<? extends ReadableNode<T>> iterator = getNodes().iterator();
       iterator.hasNext();
       )
     { // no self loops
-      ReadableNode n = iterator.next();
+      ReadableNode<T> n = iterator.next();
 			System.out.print(n.getId() + ": ");
 			boolean printedAlready = false;
 			for (
-        Iterator<? extends ReadableNode> i = n.getAdjStream().iterator();
+        Iterator<? extends ReadableNode<T>> i = n.getAdjStream().iterator();
         i.hasNext();
         )
       {
-        ReadableNode j = i.next();
+        ReadableNode<T> j = i.next();
 				if (printedAlready) {
 					System.out.print(", ");
 				}
@@ -42,23 +44,27 @@ public abstract class ReadableGraph {
 
 	}
 
-	public abstract List<Integer> getNeighbors(int node);
+	public abstract List<T> getNeighbors(T node);
 
-  public Set<? extends ReadableNode> getNeighbors(ReadableNode n) {
+  public Set<? extends ReadableNode<T>> getNeighbors(ReadableNode<T> n) {
 		return n.getAdjSet();
 	}
 
-  public abstract List<Integer> getInboundNodes(int id);
+  public abstract List<T> getInboundNodes(T id);
 
-  public abstract ReadableNode getNode(int i);
+  public abstract ReadableNode<T> getNode(T i);
 
-  public abstract Stream<? extends ReadableNode> getNodes();
+  public abstract Stream<? extends ReadableNode<T>> getNodes();
 
-	public Iterator<? extends ReadableNode> getDFSIterator() {
-		return new DFSIterator(getNode(0));
+	public Iterator<? extends ReadableNode<T>> getDFSIterator() {
+    Optional<? extends ReadableNode<T>> node = getNodes().findAny();
+		return
+      node.isPresent()
+        ? new DFSIterator(node.get())
+        : Collections.emptyIterator();
 	}
 
-	public Iterator<? extends ReadableNode> getDFSIterator(ReadableNode s) {
+	public Iterator<? extends ReadableNode<T>> getDFSIterator(ReadableNode<T> s) {
 		return new DFSIterator(s);
 	}
 
@@ -74,15 +80,18 @@ public abstract class ReadableGraph {
 	 * should contain.
 	 * @return A {@link Graph} over the indicated subset of nodes.
 	 */
-	static ReadableGraph getSubGraph(ReadableGraph graph, Set<Integer> nodes) {
-		return new ReadableGraph() {
+	static <T> ReadableGraph<T> getSubGraph(
+    ReadableGraph<T> graph,
+    Set<T> nodes)
+  {
+		return new ReadableGraph<T>() {
 			@Override
 			public int getNodeCnt() {
 				return nodes.size();
 			}
 
 			@Override
-			public List<Integer> getNeighbors(int node) {
+			public List<T> getNeighbors(T node) {
 				return
 					graph.getNeighbors(node)
 						.stream()
@@ -91,7 +100,7 @@ public abstract class ReadableGraph {
 			}
 
 			@Override
-			public List<Integer> getInboundNodes(int id) {
+			public List<T> getInboundNodes(T id) {
 				return
 					graph.getInboundNodes(id)
 						.stream()
@@ -100,27 +109,27 @@ public abstract class ReadableGraph {
 			}
 
 			@Override
-			public ReadableNode getNode(int i) {
+			public ReadableNode<T> getNode(T i) {
 				return wrapNode(graph.getNode(i));
 			}
 
 			@Override
-			public Stream<ReadableNode> getNodes() {
+			public Stream<ReadableNode<T>> getNodes() {
 				return
 					graph.getNodes()
 						.filter(node -> nodes.contains(node.getId()))
 						.map(this::wrapNode);
 			}
 
-			private ReadableNode wrapNode(ReadableNode node) {
-				return new ReadableNode(node.getId()) {
+			private ReadableNode<T> wrapNode(ReadableNode<T> node) {
+				return new ReadableNode<T>(node.getId()) {
           @Override
-					Set<ReadableNode> getAdjSet() {
-						return getAdjStream().collect(Collectors.<ReadableNode>toSet());
+					Set<ReadableNode<T>> getAdjSet() {
+						return getAdjStream().collect(Collectors.<ReadableNode<T>>toSet());
 					}
 
 					@Override
-					Stream<? extends ReadableNode> getAdjStream() {
+					Stream<? extends ReadableNode<T>> getAdjStream() {
 						return
 							node.getAdjStream()
 								.filter(node -> nodes.contains(node.getId()));
@@ -130,14 +139,14 @@ public abstract class ReadableGraph {
 		};
 	}
 
-	private class DFSIterator implements Iterator<ReadableNode> {
+	private class DFSIterator implements Iterator<ReadableNode<T>> {
 
-		private Set<ReadableNode> seenNodes;
-		private Stack<List<ReadableNode>> adjListStack;
+		private Set<ReadableNode<T>> seenNodes;
+		private Stack<List<ReadableNode<T>>> adjListStack;
 		private Stack<Integer> indexStack;
-		private ReadableNode nextNode;
+		private ReadableNode<T> nextNode;
 
-		DFSIterator(ReadableNode s) {
+		DFSIterator(ReadableNode<T> s) {
 			seenNodes = new HashSet<>();
 			adjListStack = new Stack<>();
 			indexStack = new Stack<>();
@@ -145,7 +154,7 @@ public abstract class ReadableGraph {
 
 			seenNodes.add(s);
 			adjListStack.add(
-        s.getAdjStream().collect(Collectors.<ReadableNode>toList()));
+        s.getAdjStream().collect(Collectors.<ReadableNode<T>>toList()));
 			indexStack.add(0);
 		}
 
@@ -155,16 +164,16 @@ public abstract class ReadableGraph {
 		}
 
 		@Override
-		public ReadableNode next() {
-			ReadableNode output = nextNode;
+		public ReadableNode<T> next() {
+			ReadableNode<T> output = nextNode;
 			nextNode = determineNextNode();
 			return output;
 		}
 
-		private ReadableNode determineNextNode() {
+		private ReadableNode<T> determineNextNode() {
 			if(adjListStack.isEmpty()) return null;
 
-			List<ReadableNode> adjList = adjListStack.peek();
+			List<ReadableNode<T>> adjList = adjListStack.peek();
 			int index = indexStack.peek();
 			if (index == adjList.size()) {
 				adjListStack.pop();
@@ -172,7 +181,7 @@ public abstract class ReadableGraph {
 				return determineNextNode();
 			}
 
-			ReadableNode potentialNode = adjList.get(index);
+			ReadableNode<T> potentialNode = adjList.get(index);
 			indexStack.push(indexStack.pop() + 1);//increment the last entry in the index stack
 
 			if (seenNodes.contains(potentialNode)) {
@@ -182,7 +191,7 @@ public abstract class ReadableGraph {
 			seenNodes.add(potentialNode);
 			adjListStack.add(
 				potentialNode.getAdjStream()
-          .collect(Collectors.<ReadableNode>toList()));
+          .collect(Collectors.<ReadableNode<T>>toList()));
 			indexStack.add(0);
 			return potentialNode;
 		}

@@ -46,15 +46,17 @@ class TransitionMatrix {
    * @return The {@link TransitionMatrix} constructed for the provided
    * parameters.
    */
-  static TransitionMatrix fromProbabilityRetriever(
-    Stream<? extends ReadableNode> nodes,
-    Function<ReadableNode, ToDoubleFunction<ReadableNode>> probabilityRetriever)
+  static <T> TransitionMatrix fromProbabilityRetriever(
+    Stream<? extends ReadableNode<T>> nodes,
+    Function<ReadableNode<T>, ToDoubleFunction<ReadableNode<T>>>
+      probabilityRetriever)
   {
-    List<ReadableNode> orderedNodes =
+    List<ReadableNode<T>> orderedNodes =
       // Sorting by ID is unnecessary but makes debugging easier.
       nodes.sorted(
-          (node1, node2) -> Integer.compare(node1.getId(), node2.getId()))
-        .collect(Collectors.<ReadableNode>toList());
+          (node1, node2) ->
+            Integer.compare(node1.getId().hashCode(), node2.getId().hashCode()))
+        .collect(Collectors.<ReadableNode<T>>toList());
 	return
       new TransitionMatrix(
         orderedNodes.stream()
@@ -75,14 +77,14 @@ class TransitionMatrix {
    * {@code transitionMaps.get(i).get(j)} should return the probability of going
    * to {@link Node} {@code j} after being at {@link Node} {@code i}.
    */
-  static TransitionMatrix fromTransitionMaps(
-    Map<ReadableNode, Map<ReadableNode, Double>> transitionMaps)
+  static <T> TransitionMatrix fromTransitionMaps(
+    Map<ReadableNode<T>, Map<ReadableNode<T>, Double>> transitionMaps)
   {
     return
 		fromProbabilityRetriever(
 			transitionMaps.keySet().stream(),
 			source -> {
-				Map<ReadableNode, Double> map = transitionMaps.get(source);
+				Map<ReadableNode<T>, Double> map = transitionMaps.get(source);
 				return target -> map.getOrDefault(target, 0d);
 			}
 		);

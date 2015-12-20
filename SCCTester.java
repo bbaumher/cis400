@@ -9,13 +9,13 @@ import java.util.Set;
 
 public class SCCTester {
 
-	public static boolean isStronglyConnected(Graph g) {
+	public static <T> boolean isStronglyConnected(ReadableGraph<T> g) {
 		
-		Iterator<Node> iter1 = g.getDFSIterator();
+		Iterator<? extends ReadableNode<T>> iter1 = g.getDFSIterator();
 		while (iter1.hasNext()) {
-			Node v = iter1.next();
+			ReadableNode<T> v = iter1.next();
 			
-			Iterator<Node> iter2 = g.getDFSIterator(v);
+			Iterator<? extends ReadableNode<T>> iter2 = g.getDFSIterator(v);
 			int counter = 0;
 			while (iter2.hasNext()) {
 				iter2.next();
@@ -27,20 +27,22 @@ public class SCCTester {
 		return true;
 	}
 
-	public static Iterator<ReadableGraph> getStronglyConnectedComponents(
-    Graph graph)
+	public static <T> Iterator<ReadableGraph<T>> getStronglyConnectedComponents(
+    ReadableGraph<T> graph)
   {
 		// Algorithm from
 		// https://en.wikipedia.org/wiki/Path-based_strong_component_algorithm
-		return new Iterator<ReadableGraph>() {
-			private final Iterator<Node> iterator = graph.getNodes().iterator();
-			private Node nextNode = null;
-			private final Map<Node, Integer> preorderNumbers =
+		return new Iterator<ReadableGraph<T>>() {
+			private final Iterator<? extends ReadableNode<T>> iterator =
+        graph.getNodes().iterator();
+			private ReadableNode<T> nextNode = null;
+			private final Map<ReadableNode<T>, Integer> preorderNumbers =
 				new HashMap<>(graph.getNodeCnt());
-			private final Deque<Node> unassignedStack = new ArrayDeque<>();
-			private final Deque<Node> nonloopingStack = new ArrayDeque<>();
-			private final Deque<Node> callStack = new ArrayDeque<>();
-			private final Deque<Iterator<Node>> iterators = new ArrayDeque<>();
+			private final Deque<ReadableNode<T>> unassignedStack = new ArrayDeque<>();
+			private final Deque<ReadableNode<T>> nonloopingStack = new ArrayDeque<>();
+			private final Deque<ReadableNode<T>> callStack = new ArrayDeque<>();
+			private final Deque<Iterator<? extends ReadableNode<T>>> iterators =
+        new ArrayDeque<>();
 			
 			@Override
 			public boolean hasNext() {
@@ -59,7 +61,7 @@ public class SCCTester {
 			}
 
 			@Override
-			public ReadableGraph next() {
+			public ReadableGraph<T> next() {
 				while (true) {
 					if (!hasNext()) {
 						throw new NoSuchElementException();
@@ -71,7 +73,7 @@ public class SCCTester {
 					}
 
 					while (iterators.peek().hasNext()) {
-						Node node = iterators.peek().next();
+						ReadableNode<T> node = iterators.peek().next();
 						Integer preorderNumber = preorderNumbers.get(node);
 						if (preorderNumber == null) {
 							pushOntoStacks(node);
@@ -86,12 +88,12 @@ public class SCCTester {
 						}
 					}
 
-					Node node = callStack.pop();
+					ReadableNode<T> node = callStack.pop();
 					iterators.pop();
 					if (nonloopingStack.peek().equals(node)) {
-						Set<Integer> result = new HashSet<>();
+						Set<T> result = new HashSet<>();
 						nonloopingStack.pop();
-						Node nodeInComponent;
+						ReadableNode<T> nodeInComponent;
 						do {
 							nodeInComponent = unassignedStack.pop();
 							result.add(nodeInComponent.getId());
@@ -102,7 +104,7 @@ public class SCCTester {
 				}
 			}
 			
-			private void pushOntoStacks(Node node) {
+			private void pushOntoStacks(ReadableNode<T> node) {
 				callStack.push(node);
 				iterators.push(node.getAdjStream().iterator());
 				unassignedStack.push(node);

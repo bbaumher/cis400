@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
-public class AdjMatrixGraph extends Graph{
+public class AdjMatrixGraph extends Graph<Integer> {
 	
 	int[][] adjMatrix;
 	int nodes;
@@ -26,12 +26,12 @@ public class AdjMatrixGraph extends Graph{
 	
 	// shouldn't be able to add a node, would have to change array size....
 	@Override
-	public Node addNode() {
+	public Node<Integer> addNode() {
 		return null;
 	}
 
   @Override
-	public void addEdge(int i, int j) {
+	public void addEdge(Integer i, Integer j) {
 		adjMatrix[i][j] = 1;
 	}
 	
@@ -40,7 +40,7 @@ public class AdjMatrixGraph extends Graph{
 	 * 
 	 */
   @Override
-	public void addEdge(Node i, Node j) throws IllegalArgumentException {
+	public void addEdge(Node<Integer> i, Node<Integer> j) throws IllegalArgumentException {
 		if (i.getId() >= nodes || j.getId() >= nodes) {
 			throw new IllegalArgumentException("bad index");
 		}
@@ -48,7 +48,7 @@ public class AdjMatrixGraph extends Graph{
 	}
 
   @Override
-	public List<Integer> getNeighbors(int id) {
+	public List<Integer> getNeighbors(Integer id) {
 		List<Integer> neighbors = new ArrayList<>();
 		
 		for (int i = 0; i < nodes; i++ ) {
@@ -61,7 +61,7 @@ public class AdjMatrixGraph extends Graph{
 	}
 	
 	@Override
-	public List<Integer> getInboundNodes(int id) {
+	public List<Integer> getInboundNodes(Integer id) {
 		List<Integer> neighbors = new ArrayList<>();
 		
 		for (int i = 0; i < nodes; i++ ) {
@@ -74,22 +74,22 @@ public class AdjMatrixGraph extends Graph{
 	}
 
 	@Override
-	public Node getNode(int i) {
-		return new Node(i) {
+	public Node<Integer> getNode(Integer i) {
+		return new Node<Integer>(i) {
 			@Override
-			void addEdge(Node a) {
+			void addEdge(Node<Integer> a) {
 				AdjMatrixGraph.this.addEdge(this, a);
 			}
 
 			@Override
-			Set<Node> getAdjSet() {
+			Set<Node<Integer>> getAdjSet() {
 				return
 					getAdjStream()
 						.collect(Collectors.toCollection(HashSet::new));
 			}
 
 			@Override
-			Stream<Node> getAdjStream() {
+			Stream<Node<Integer>> getAdjStream() {
 				return
 					IntStream.range(0, nodes).filter(j -> adjMatrix[i][j] != 0)
 						.mapToObj(AdjMatrixGraph.this::getNode);
@@ -98,7 +98,7 @@ public class AdjMatrixGraph extends Graph{
 	}
 
 	@Override
-	public Stream<Node> getNodes() {
+	public Stream<Node<Integer>> getNodes() {
 		return IntStream.range(0, getNodeCnt()).mapToObj(this::getNode);
 	}
 	

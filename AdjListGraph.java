@@ -5,11 +5,11 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class AdjListGraph extends Graph { // undirected graph
+public class AdjListGraph extends Graph<Integer> { // undirected graph
 	
 	int nodes;
 	int nodeCnt;
-	ArrayList<Node> nodeList;
+	ArrayList<Node<Integer>> nodeList;
 	
 	public AdjListGraph(int n) {
 		nodes = n;
@@ -26,15 +26,15 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 	
 	@Override
-	public Node addNode() {
-		Node node = new AdjListNode(nodeCnt);
+	public Node<Integer> addNode() {
+		Node<Integer> node = new AdjListNode(nodeCnt);
 		nodeCnt++;
 		nodeList.add(node);
 		return node;
 	}
 	
 	@Override
-	public void addEdge(int i, int j) throws IllegalArgumentException {
+	public void addEdge(Integer i, Integer j) throws IllegalArgumentException {
 		if (i >= nodes || j >= nodes) {
 			throw new IllegalArgumentException("bad index");
 		}
@@ -43,31 +43,31 @@ public class AdjListGraph extends Graph { // undirected graph
 	
 	 
 	@Override
-	public void addEdge(Node i, Node j) {
+	public void addEdge(Node<Integer> i, Node<Integer> j) {
 		i.addEdge(j);
 	}
 	
 	@Override
-	public Node getNode(int index) {
+	public Node<Integer> getNode(Integer index) {
 		return nodeList.get(index);
 	}
 
 	@Override
-	public List<Integer> getNeighbors(int id) {
-		Node node = this.getNode(id);
-		Iterable<Node> neighbors = node.getAdjStream()::iterator;
+	public List<Integer> getNeighbors(Integer id) {
+		Node<Integer> node = this.getNode(id);
+		Iterable<Node<Integer>> neighbors = node.getAdjStream()::iterator;
 		List<Integer> neighborIds = new ArrayList<>();
-		for ( Node n : neighbors ) {
+		for ( Node<Integer> n : neighbors ) {
 			neighborIds.add(n.getId());	
 		}
 		return neighborIds;
 	}
 
 	@Override
-	public List<Integer> getInboundNodes(int id) {
+	public List<Integer> getInboundNodes(Integer id) {
 		List<Integer> neighbors = new ArrayList<>();
-		Node node = this.getNode(id);
-		for (Node n : nodeList) {
+		Node<Integer> node = this.getNode(id);
+		for (Node<Integer> n : nodeList) {
 			if (n.getAdjSet().contains(node)) {
 				neighbors.add(n.getId());
 			}
@@ -75,10 +75,10 @@ public class AdjListGraph extends Graph { // undirected graph
 		return neighbors;
 	}
 	
-	public List<Node> getInboundNodes(Node node) {
-		List<Node> neighbors = new ArrayList<>();
+	public List<Node<Integer>> getInboundNodes(Node<Integer> node) {
+		List<Node<Integer>> neighbors = new ArrayList<>();
 		
-		for (Node n : nodeList) {
+		for (Node<Integer> n : nodeList) {
 			if (n.getAdjSet().contains(node)) {
 				neighbors.add(n);
 			}
@@ -87,12 +87,12 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 
 	@Override
-	public Stream<Node> getNodes() {
+	public Stream<Node<Integer>> getNodes() {
 		return IntStream.range(0, getNodeCnt()).mapToObj(this::getNode);
 	}
 	
-	private static final class AdjListNode extends Node {
-		private Set<Node> adjSet;
+	private static final class AdjListNode extends Node<Integer> {
+		private Set<Node<Integer>> adjSet;
 
 		AdjListNode (int id) {
 			super(id);
@@ -100,17 +100,17 @@ public class AdjListGraph extends Graph { // undirected graph
 		}
 
 		@Override
-		public void addEdge(Node a) {
+		public void addEdge(Node<Integer> a) {
 			adjSet.add(a);
 		}
 
 		@Override
-		public Set<Node> getAdjSet() {
+		public Set<Node<Integer>> getAdjSet() {
 			return adjSet;
 		}
 
 		@Override
-		public Stream<Node> getAdjStream() {
+		public Stream<Node<Integer>> getAdjStream() {
 			return getAdjSet().stream();
 		}
 	}
@@ -118,10 +118,10 @@ public class AdjListGraph extends Graph { // undirected graph
 	@Override
 	public String toString() {
 		StringBuilder output = new StringBuilder();
-		for (Node v : nodeList) {
+		for (Node<Integer> v : nodeList) {
 			output.append(v).append(": ");
 			boolean printedAlready = false;
-			for (Node u : v.getAdjSet()) {
+			for (Node<Integer> u : v.getAdjSet()) {
 				if (printedAlready) {
 					output.append(", ");
 				}

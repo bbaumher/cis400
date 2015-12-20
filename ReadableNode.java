@@ -2,34 +2,34 @@
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class ReadableNode {
-  final int id;
+public abstract class ReadableNode<T> {
+  final T id;
 
-  ReadableNode(int id) {
+  ReadableNode(T id) {
 		this.id = id;
 	}
 
-	public int getId() {
+	public T getId() {
 		return id;
 	}
   
-  abstract Set<? extends ReadableNode> getAdjSet();
+  abstract Set<? extends ReadableNode<T>> getAdjSet();
 
-	abstract Stream<? extends ReadableNode> getAdjStream();
+	abstract Stream<? extends ReadableNode<T>> getAdjStream();
 
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ReadableNode)) {
 			return false;
 		}
-		ReadableNode node = (ReadableNode) obj;
+		ReadableNode<T> node = (ReadableNode) obj;
 		return node.id == id;
 	}
 
 
 	@Override
 	public int hashCode() {
-		return id;
+		return id.hashCode();
 	}
 
 	@Override

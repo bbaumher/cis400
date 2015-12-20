@@ -20,15 +20,16 @@ import java.util.stream.IntStream;
 
 public class ReferralLog {
 	// A Map from the neighbors to the index of that node in the int[]s.
-	private final Map<ReadableNode, Integer> neighborToIndexMap = new HashMap<>();
-	Map<ReadableNode,int[]> referralMap; //the actual mapping from Node to int[]
+	private final Map<ReadableNode<?>, Integer> neighborToIndexMap =
+    new HashMap<>();
+	Map<ReadableNode<?>,int[]> referralMap; //the actual mapping from Node to int[]
 	
 	/** Construct a ReferralLog by storing the neighbors and
 	 *  instantiating the map.
 	 * 
 	 * @param neighbors the neighbors of s
 	 */
-	public ReferralLog (List<ReadableNode> neighbors) {
+	public ReferralLog (List<ReadableNode<?>> neighbors) {
 		IntStream.range(0, neighbors.size())
 			.forEach(
 				index -> neighborToIndexMap.put(neighbors.get(index), index));
@@ -39,7 +40,7 @@ public class ReferralLog {
 	 *  If it doesn't have one yet, then an empty one is created,
 	 *  added to the mapping, and returned.
 	 */
-	public int[] getReferral(ReadableNode node) {
+	public int[] getReferral(ReadableNode<?> node) {
 		if (referralMap.containsKey(node)) { //node already has a referral array
 			return referralMap.get(node);
 		}
@@ -54,8 +55,8 @@ public class ReferralLog {
 	 * Set the entry of node's referral array corresponding to centralNeighbor.
 	 */
 	public void setValue(
-    ReadableNode fringeNode,
-    ReadableNode centralNeighbor,
+    ReadableNode<?> fringeNode,
+    ReadableNode<?> centralNeighbor,
     int value)
   {
 		int[] values = getReferral(fringeNode);
@@ -65,7 +66,7 @@ public class ReferralLog {
 	/** Add the values of node1's referral array onto the
 	 *  referral array of node2.
 	 */
-	public void addValuesOnto(ReadableNode node1, ReadableNode node2) {
+	public void addValuesOnto(ReadableNode<?> node1, ReadableNode<?> node2) {
 		int[] node1ref = getReferral(node1);
 		int[] node2ref = getReferral(node2);
 		for (int i = 0; i < neighborToIndexMap.size(); i++) {
@@ -79,7 +80,7 @@ public class ReferralLog {
 	@Override
 	public String toString() {
 		StringBuilder buf = new StringBuilder();
-		for (ReadableNode v : referralMap.keySet()) {
+		for (ReadableNode<?> v : referralMap.keySet()) {
 			buf.append(v).append(" = ");
 			for (int value : getReferral(v)) {
 				buf.append(value).append(" ");

@@ -4,7 +4,7 @@
 class LollipopGraphGenerator {
 	private LollipopGraphGenerator() { }
 	
-	static Graph generateAdjListGraph(int n) {
+	static ReadableGraph<Integer> generateAdjListGraph(int n) {
 		AdjListGraph graph = new AdjListGraph(n);
 		for (int i = n / 2 - 1; i >= 0; i--) {
 			for (int j = n / 2 - 1; j >= 0; j--) {

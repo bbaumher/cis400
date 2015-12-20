@@ -27,7 +27,7 @@ public class StandardGraphGenerator implements GraphGenerator {
 	 *  each edge appearing with probability p.
 	 *  No self loops are allowed.
 	 */
-	private void fillInEdges (Graph g, double p) {
+	private void fillInEdges (Graph<Integer> g, double p) {
 		
 		for (int i = 0; i < g.getNodeCnt(); i++) { 
 			int edgesAdded = 0;

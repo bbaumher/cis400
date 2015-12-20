@@ -13,11 +13,11 @@ public class NodeCoverRunner {
 		this.random = random;
 	}
 		
-	public int getCoverTime(Graph g, Node s, int k) {
+	public int getCoverTime(Graph<?> g, Node<?> s, int k) {
 		
-		Set<ReadableNode> coveredNodes = new HashSet<>();
+		Set<ReadableNode<?>> coveredNodes = new HashSet<>();
 		coveredNodes.add(s);
-		ReadableNode currentNode = s;
+		ReadableNode<?> currentNode = s;
 		
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; true; i++) {
@@ -25,7 +25,7 @@ public class NodeCoverRunner {
 				return i;
 			}
 			
-			Map<ReadableNode, Double> probDist =
+			Map<ReadableNode<?>, Double> probDist =
 				ProbabilityDistributionAlgorithm
 					.getNeighborVector(
 						currentNode,
@@ -44,11 +44,11 @@ public class NodeCoverRunner {
 
 	}
 	
-	private ReadableNode transition(Map<ReadableNode, Double> probDist) {
+	private ReadableNode<?> transition(Map<ReadableNode<?>, Double> probDist) {
 		double rand = random.nextDouble();
 		double threshold = 0;
-		for (Map.Entry<ReadableNode, Double> entry : probDist.entrySet()) {
-			ReadableNode u = entry.getKey();
+		for (Map.Entry<ReadableNode<?>, Double> entry : probDist.entrySet()) {
+			ReadableNode<?> u = entry.getKey();
 			double prob = entry.getValue();
 			
 			threshold += prob;
