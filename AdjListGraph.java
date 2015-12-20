@@ -14,7 +14,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	public AdjListGraph(int n) {
 		nodes = n;
 		nodeCnt = 0;
-		nodeList = new ArrayList<Node>();
+		nodeList = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
 			nodeList.add(new AdjListNode(i));
 		}
@@ -33,7 +33,7 @@ public class AdjListGraph extends Graph { // undirected graph
 		return node;
 	}
 	
-	
+	@Override
 	public void addEdge(int i, int j) throws IllegalArgumentException {
 		if (i >= nodes || j >= nodes) {
 			throw new IllegalArgumentException("bad index");
@@ -42,7 +42,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 	
 	 
-	
+	@Override
 	public void addEdge(Node i, Node j) {
 		i.addEdge(j);
 	}
@@ -56,7 +56,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	public List<Integer> getNeighbors(int id) {
 		Node node = this.getNode(id);
 		Iterable<Node> neighbors = node.getAdjStream()::iterator;
-		List<Integer> neighborIds = new ArrayList<Integer>();
+		List<Integer> neighborIds = new ArrayList<>();
 		for ( Node n : neighbors ) {
 			neighborIds.add(n.getId());	
 		}
@@ -65,7 +65,7 @@ public class AdjListGraph extends Graph { // undirected graph
 
 	@Override
 	public List<Integer> getInboundNodes(int id) {
-		List<Integer> neighbors = new ArrayList<Integer>();
+		List<Integer> neighbors = new ArrayList<>();
 		Node node = this.getNode(id);
 		for (Node n : nodeList) {
 			if (n.getAdjSet().contains(node)) {
@@ -76,7 +76,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	}
 	
 	public List<Node> getInboundNodes(Node node) {
-		List<Node> neighbors = new ArrayList<Node>();
+		List<Node> neighbors = new ArrayList<>();
 		
 		for (Node n : nodeList) {
 			if (n.getAdjSet().contains(node)) {
@@ -94,7 +94,7 @@ public class AdjListGraph extends Graph { // undirected graph
 	private static final class AdjListNode extends Node {
 		private Set<Node> adjSet;
 
-		public AdjListNode (int id) {
+		AdjListNode (int id) {
 			super(id);
 			this.adjSet = new HashSet<>();
 		}
@@ -117,9 +117,9 @@ public class AdjListGraph extends Graph { // undirected graph
 	
 	@Override
 	public String toString() {
-		StringBuffer output = new StringBuffer();
+		StringBuilder output = new StringBuilder();
 		for (Node v : nodeList) {
-			output.append(v + ": ");
+			output.append(v).append(": ");
 			boolean printedAlready = false;
 			for (Node u : v.getAdjSet()) {
 				if (printedAlready) {

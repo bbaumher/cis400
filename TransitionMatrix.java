@@ -47,14 +47,14 @@ class TransitionMatrix {
    * parameters.
    */
   static TransitionMatrix fromProbabilityRetriever(
-    Stream<Node> nodes,
-    Function<Node, ToDoubleFunction<Node>> probabilityRetriever)
+    Stream<? extends ReadableNode> nodes,
+    Function<ReadableNode, ToDoubleFunction<ReadableNode>> probabilityRetriever)
   {
-    List<Node> orderedNodes =
+    List<ReadableNode> orderedNodes =
       // Sorting by ID is unnecessary but makes debugging easier.
       nodes.sorted(
           (node1, node2) -> Integer.compare(node1.getId(), node2.getId()))
-        .collect(Collectors.toList());
+        .collect(Collectors.<ReadableNode>toList());
 	return
       new TransitionMatrix(
         orderedNodes.stream()
@@ -76,13 +76,13 @@ class TransitionMatrix {
    * to {@link Node} {@code j} after being at {@link Node} {@code i}.
    */
   static TransitionMatrix fromTransitionMaps(
-    Map<Node, Map<Node, Double>> transitionMaps)
+    Map<ReadableNode, Map<ReadableNode, Double>> transitionMaps)
   {
     return
 		fromProbabilityRetriever(
 			transitionMaps.keySet().stream(),
 			source -> {
-				Map<Node, Double> map = transitionMaps.get(source);
+				Map<ReadableNode, Double> map = transitionMaps.get(source);
 				return target -> map.getOrDefault(target, 0d);
 			}
 		);

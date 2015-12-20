@@ -29,7 +29,8 @@ public class AdjMatrixGraph extends Graph{
 	public Node addNode() {
 		return null;
 	}
-	
+
+  @Override
 	public void addEdge(int i, int j) {
 		adjMatrix[i][j] = 1;
 	}
@@ -38,15 +39,17 @@ public class AdjMatrixGraph extends Graph{
 	 * @param Node i,j: both node ends of edge, undirected, so doesnt matter  
 	 * 
 	 */
+  @Override
 	public void addEdge(Node i, Node j) throws IllegalArgumentException {
 		if (i.getId() >= nodes || j.getId() >= nodes) {
 			throw new IllegalArgumentException("bad index");
 		}
 		adjMatrix[i.getId()][j.getId()] = 1;
 	}
-	
+
+  @Override
 	public List<Integer> getNeighbors(int id) {
-		List<Integer> neighbors = new ArrayList<Integer>();
+		List<Integer> neighbors = new ArrayList<>();
 		
 		for (int i = 0; i < nodes; i++ ) {
 			if (adjMatrix[id][i] != 0) {
@@ -57,9 +60,9 @@ public class AdjMatrixGraph extends Graph{
 		return neighbors;	
 	}
 	
-	
+	@Override
 	public List<Integer> getInboundNodes(int id) {
-		List<Integer> neighbors = new ArrayList<Integer>();
+		List<Integer> neighbors = new ArrayList<>();
 		
 		for (int i = 0; i < nodes; i++ ) {
 			if (adjMatrix[i][id] != 0) {

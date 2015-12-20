@@ -27,10 +27,12 @@ public class SCCTester {
 		return true;
 	}
 
-	public static Iterator<Graph> getStronglyConnectedComponents(Graph graph) {
+	public static Iterator<ReadableGraph> getStronglyConnectedComponents(
+    Graph graph)
+  {
 		// Algorithm from
 		// https://en.wikipedia.org/wiki/Path-based_strong_component_algorithm
-		return new Iterator<Graph>() {
+		return new Iterator<ReadableGraph>() {
 			private final Iterator<Node> iterator = graph.getNodes().iterator();
 			private Node nextNode = null;
 			private final Map<Node, Integer> preorderNumbers =
@@ -57,7 +59,7 @@ public class SCCTester {
 			}
 
 			@Override
-			public Graph next() {
+			public ReadableGraph next() {
 				while (true) {
 					if (!hasNext()) {
 						throw new NoSuchElementException();
@@ -89,13 +91,13 @@ public class SCCTester {
 					if (nonloopingStack.peek().equals(node)) {
 						Set<Integer> result = new HashSet<>();
 						nonloopingStack.pop();
-						Node nodeInComponent = null;
+						Node nodeInComponent;
 						do {
 							nodeInComponent = unassignedStack.pop();
 							result.add(nodeInComponent.getId());
 							preorderNumbers.put(nodeInComponent, -1);
 						} while (!node.equals(nodeInComponent));
-						return Graph.getSubGraph(graph, result);
+						return ReadableGraph.getSubGraph(graph, result);
 					}
 				}
 			}
@@ -109,4 +111,7 @@ public class SCCTester {
 			}
 		};
 	}
+
+  private SCCTester() {
+  }
 }

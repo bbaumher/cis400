@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,29 +18,28 @@ public class ProbabilityDistributionAlgorithm {
 	 * probabilities after the traversal is complete.
 	 * @return 
 	 */
-	public static Map<Node, Double> getNeighborVector(
-		Node s,
+	public static Map<ReadableNode, Double> getNeighborVector(
+		ReadableNode s,
 		int k,
 		CreditCalculator creditCalculator)
 	{
-		Set<Node> seenNodes = new HashSet<Node>(); //the nodes that no longer need to be considered
-		Queue<Node> nodeQueue = new LinkedList<Node>(); //the nodes on the current layer of the BFS
-		Set<Node> pendingNodes = new HashSet<Node>(); //the the nodes being discovered on the edge of the BFS
-		List<Node> adjList = new ArrayList<Node>(); //the number of neighbors of the starting node
+		Set<ReadableNode> seenNodes = new HashSet<>(); //the nodes that no longer need to be considered
+		Queue<ReadableNode> nodeQueue = new LinkedList<>(); //the nodes on the current layer of the BFS
+		Set<ReadableNode> pendingNodes = new HashSet<>(); //the the nodes being discovered on the edge of the BFS
+		List<ReadableNode> adjList = new ArrayList<>(); //the number of neighbors of the starting node
 		adjList.addAll(s.getAdjSet());
-		ArrayList<Set<Node>> nodeTiers = new ArrayList<Set<Node>>(); //a list of sets of nodes, each set containing nodes i away from s
+		ArrayList<Set<ReadableNode>> nodeTiers = new ArrayList<>(); //a list of sets of nodes, each set containing nodes i away from s
 		ReferralLog referralLog = new ReferralLog(adjList); //a map from each node to its referral array
-		
-		//give each of s's neighbors a 1 in its corresponding referral array
-		for (int i = 0; i < adjList.size(); i++) {
-			Node v = adjList.get(i);
-			referralLog.setValue(v, adjList.get(i), 1);
-			pendingNodes.add(v);
-		}
+    
+    //give each of s's neighbors a 1 in its corresponding referral array
+    for (ReadableNode v : adjList) {
+      referralLog.setValue(v, v, 1);
+      pendingNodes.add(v);
+    }
 		
 		//perform logistics on s as the zeroth tier
 		seenNodes.add(s);
-		Set<Node> zerothTier = new HashSet<Node>();
+		Set<ReadableNode> zerothTier = new HashSet<>();
 		zerothTier.add(s);
 		nodeTiers.add(zerothTier);
 		
@@ -48,16 +48,23 @@ public class ProbabilityDistributionAlgorithm {
 			seenNodes.addAll(pendingNodes); //archive the nodes seen last round
 			nodeQueue.addAll(pendingNodes); //the nodes discovered last round are next
 			nodeTiers.add(pendingNodes); //add the pending nodes to the nodeTiers
-			pendingNodes = new HashSet<Node>(); //reset the pending nodes
+			pendingNodes = new HashSet<>(); //reset the pending nodes
 			
 			//iterate through each node in the queue
 			while (!nodeQueue.isEmpty()) {
-				Node v = nodeQueue.poll();
+				ReadableNode v = nodeQueue.poll();
 				
 				//examine each of the node's neighbors
-				for (Node u : (Iterable<Node>) v.getAdjStream()::iterator) {
-					if (seenNodes.contains(u)) continue; //if we've seen it before, skip it
-					else {//otherwise, we haven't seen it yet
+				for (
+          Iterator<? extends ReadableNode> iterator =
+            v.getAdjStream().iterator();
+          iterator.hasNext();
+          )
+        {
+          ReadableNode u = iterator.next();
+					if (seenNodes.contains(u)) {
+          } //if we've seen it before, skip it
+          else {//otherwise, we haven't seen it yet
 						pendingNodes.add(u); //add it to the pending nodes (possibly redundantly)
 						referralLog.addValuesOnto(v,u); //propagate the referrals
 					}
@@ -70,12 +77,11 @@ public class ProbabilityDistributionAlgorithm {
 		
 		//perform and return some algorithm to determine credits
 		double[] p =
-			calculateCredits4(nodeTiers, referralLog, adjList.size(), k);
 			creditCalculator.apply(nodeTiers, referralLog, adjList.size(), k);
 		
-		Map<Node, Double> result = new HashMap<>(adjList.size());
+		Map<ReadableNode, Double> result = new HashMap<>(adjList.size());
 		int index = 0;
-		for (Node node : adjList) {
+		for (ReadableNode node : adjList) {
 			result.put(node, p[index++]);
 		}
 		return result;
@@ -91,7 +97,7 @@ public class ProbabilityDistributionAlgorithm {
 	 * @return A {@link TransitionMatrix} for the Markov chain.
 	 */
 	static TransitionMatrix getTransitionMatrix(
-		Graph graph,
+		ReadableGraph graph,
 		int k,
 		CreditCalculator creditCalculator)
 	{
@@ -99,7 +105,7 @@ public class ProbabilityDistributionAlgorithm {
 			TransitionMatrix.fromProbabilityRetriever(
 				graph.getNodes(),
 				source -> {
-					Map<Node, Double> map =
+					Map<ReadableNode, Double> map =
 						getNeighborVector(source, k, creditCalculator);
 					return target -> map.getOrDefault(target, 0d);
 				}
@@ -115,13 +121,13 @@ public class ProbabilityDistributionAlgorithm {
 	 * @param k we consider nodes up to k away from the starting node
 	 * @return the probability distribution for going to s's neighbors
 	 */
-	static double[] calculateCredits(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits(ArrayList<Set<ReadableNode>> nodeTiers,
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
-		Set<Node> edgeNodes = nodeTiers.get(k); //get the final tier (i.e. nodes exactly k away from s)
+		Set<ReadableNode> edgeNodes = nodeTiers.get(k); //get the final tier (i.e. nodes exactly k away from s)
 		
 		//each node has 1 credit, which is split proportionally to its referrals
-		for (Node v : edgeNodes) {
+		for (ReadableNode v : edgeNodes) {
 			int[] referrals = referralLog.getReferral(v);
 			for (int i = 0; i < referrals.length; i++) {
 				double sum = sum(referrals);
@@ -134,14 +140,14 @@ public class ProbabilityDistributionAlgorithm {
 	
 	/** All tiers give out credits.
 	 */
-	static double[] calculateCredits2(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits2(ArrayList<Set<ReadableNode>> nodeTiers,
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		
 		for (int t = 2; t <= k; t++) {
-			Set<Node> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
+			Set<ReadableNode> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
 			//each node has 1 credit, which is split proportionally to its referrals
-			for (Node v : tier) {
+			for (ReadableNode v : tier) {
 				int[] referrals = referralLog.getReferral(v);
 				for (int i = 0; i < referrals.length; i++) {
 					double sum = sum(referrals);
@@ -155,14 +161,14 @@ public class ProbabilityDistributionAlgorithm {
 	
 	/** All tiers give out credits, but proportionally to their distance away.
 	 */
-	static double[] calculateCredits3(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits3(ArrayList<Set<ReadableNode>> nodeTiers,
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		
 		for (int t = 2; t <= k; t++) {
-			Set<Node> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
+			Set<ReadableNode> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
 			//each node has 1 credit, which is split proportionally to its referrals
-			for (Node v : tier) {
+			for (ReadableNode v : tier) {
 				int[] referrals = referralLog.getReferral(v);
 				for (int i = 0; i < referrals.length; i++) {
 					double sum = sum(referrals);
@@ -176,7 +182,7 @@ public class ProbabilityDistributionAlgorithm {
 	
 	/** A control algorithm. It's a standard random walk.
 	 */
-	static double[] calculateCredits4(ArrayList<Set<Node>> nodeTiers, 
+	static double[] calculateCredits4(ArrayList<Set<ReadableNode>> nodeTiers,
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		normalize(p); //normalize the probability vector
@@ -210,7 +216,7 @@ public class ProbabilityDistributionAlgorithm {
 		double sum = sum(array);
 		for (int i = 0; i < array.length; i++) {
 			if (sum == 0) array[i] = 1.0 / array.length;
-			else array[i] = array[i] / sum;
+			else array[i] /= sum;
 		}
 	}
 
@@ -219,11 +225,14 @@ public class ProbabilityDistributionAlgorithm {
 	 * to produce probability distributions using the k-away system.
 	 */
 	@FunctionalInterface
-	static interface CreditCalculator {
+	public static interface CreditCalculator {
 		double[] apply(
-			ArrayList<Set<Node>> nodeTiers, 
+			ArrayList<Set<ReadableNode>> nodeTiers,
 			ReferralLog referralLog,
 			int neighborCount,
 			int k);
 	}
+
+  private ProbabilityDistributionAlgorithm() {
+  }
 }

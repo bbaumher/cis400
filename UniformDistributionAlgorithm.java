@@ -8,12 +8,12 @@ import java.util.Set;
 final class UniformDistributionAlgorithm {
 	private UniformDistributionAlgorithm() { }
 	
-	static TransitionMatrix getTransitionMatrix(Graph graph) {
+	static TransitionMatrix getTransitionMatrix(ReadableGraph graph) {
 		return
 			TransitionMatrix.fromProbabilityRetriever(
 				graph.getNodes(),
 				source -> {
-					Set<Node> neighbors = source.getAdjSet();
+					Set<? extends ReadableNode> neighbors = source.getAdjSet();
 					double result = 1d / neighbors.size();
 					return target -> neighbors.contains(target) ? result : 0d;
 				}

@@ -49,9 +49,10 @@ public class Tester {
 		testGraph.addEdge(c,s);
 		
 		int counter = 0;
-		Iterator<Graph> iter = SCCTester.getStronglyConnectedComponents(testGraph);
+		Iterator<ReadableGraph> iter =
+      SCCTester.getStronglyConnectedComponents(testGraph);
 		while (iter.hasNext()) {
-			Graph g = iter.next();
+			ReadableGraph g = iter.next();
 			System.out.println("graph " + counter + ": ");
 			g.printGraph();
 			counter++;
@@ -107,7 +108,8 @@ public class Tester {
 		Graph graph =
 			new StandardGraphGenerator(RANDOM).generateAdjListGraph(20, 0.2);
 		graph.printGraph();
-		Graph largestComponent = getLargestStronglyConnectedComponent(graph);
+		ReadableGraph largestComponent =
+      getLargestStronglyConnectedComponent(graph);
 		
 		largestComponent.printGraph();
 		
@@ -163,8 +165,9 @@ public class Tester {
 	 * @param graph The original graph.
 	 * @return {@code graph}'s largest strongly connected component.
 	 */
-	private static Graph getLargestStronglyConnectedComponent(Graph graph) {
-		Iterable<Graph> iterable =
+	private static ReadableGraph getLargestStronglyConnectedComponent(Graph graph)
+  {
+		Iterable<ReadableGraph> iterable =
 			() -> SCCTester.getStronglyConnectedComponents(graph);
 		return
 			StreamSupport.stream(iterable.spliterator(), false)
@@ -210,7 +213,7 @@ public class Tester {
 	private static void compareAlgorithms() {
 		int nodeCount = 1000;
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
-//		Graph graph =
+//		ReadableGraph graph =
 //			getLargestStronglyConnectedComponent(
 //				new StandardGraphGenerator(RANDOM)
 //					.generateAdjListGraph(
