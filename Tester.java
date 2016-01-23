@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
@@ -11,7 +12,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		compareAlgorithms();
+		main4(args);
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -19,7 +20,7 @@ public class Tester {
 	public static void main4(String[] args) {
 		GraphGenerator gg = new StandardGraphGenerator(RANDOM);
 		Graph<Integer> testGraph;
-		int k = 4;
+		int k = 3;
 		
 		//System.out.println(testGraph);
 		//System.out.println(SCCTester.isStronglyConnected(testGraph));
@@ -27,7 +28,7 @@ public class Tester {
 			testGraph = gg.generateAdjListGraph(1000, 0.010);
 			int coverTime =
 				new NodeCoverRunner(RANDOM)
-					.getCoverTime(testGraph, testGraph.getNode(0), k);
+					.getCoverTime(testGraph, testGraph.getNodes().findAny().get(), k);
 			System.out.println(i + "\t" + coverTime);
 		}
 	}
@@ -176,8 +177,8 @@ public class Tester {
 					(component1, component2) ->
 						Integer
 							.compare(
-								component1.getNodeCnt(),
-								component2.getNodeCnt()))
+								component2.getNodeCnt(),
+								component1.getNodeCnt()))
 				.findFirst()
 				.get();
 	}
@@ -213,16 +214,17 @@ public class Tester {
 	}
 	
 	private static void compareAlgorithms() {
-		int nodeCount = 1000;
+    System.out.print("Number of nodes: ");
+    int nodeCount = new Scanner(System.in).nextInt(10);
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
-//		ReadableGraph<Integer> graph =
-//			getLargestStronglyConnectedComponent(
-//				new StandardGraphGenerator(RANDOM)
-//					.generateAdjListGraph(
-//						nodeCount,
-//						logSize / (float) nodeCount));
 		ReadableGraph<Integer> graph =
-      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
+			getLargestStronglyConnectedComponent(
+				new StandardGraphGenerator(RANDOM)
+					.generateAdjListGraph(
+						nodeCount,
+						0.01));
+//		ReadableGraph<Integer> graph =
+//      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
 		List<ConvergenceTester> testers = new ArrayList<>(4);
 		testers.add(
@@ -233,7 +235,7 @@ public class Tester {
 				testers.add(
 					ConvergenceTester.forTransitionMatrix(
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, logSize, calculator)));
+							.getTransitionMatrix(graph, 3, calculator)));
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits3);

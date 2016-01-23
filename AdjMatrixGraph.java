@@ -75,26 +75,29 @@ public class AdjMatrixGraph extends Graph<Integer> {
 
 	@Override
 	public Node<Integer> getNode(Integer i) {
-		return new Node<Integer>(i) {
-			@Override
-			void addEdge(Node<Integer> a) {
-				AdjMatrixGraph.this.addEdge(this, a);
-			}
+		return
+      i < 0 || i >= nodeCnt
+        ? null
+        : new Node<Integer>(i) {
+            @Override
+            void addEdge(Node<Integer> a) {
+              AdjMatrixGraph.this.addEdge(this, a);
+            }
 
-			@Override
-			Set<Node<Integer>> getAdjSet() {
-				return
-					getAdjStream()
-						.collect(Collectors.toCollection(HashSet::new));
-			}
+            @Override
+            Set<Node<Integer>> getAdjSet() {
+              return
+                getAdjStream()
+                  .collect(Collectors.toCollection(HashSet::new));
+            }
 
-			@Override
-			Stream<Node<Integer>> getAdjStream() {
-				return
-					IntStream.range(0, nodes).filter(j -> adjMatrix[i][j] != 0)
-						.mapToObj(AdjMatrixGraph.this::getNode);
-			}
-		};
+            @Override
+            Stream<Node<Integer>> getAdjStream() {
+              return
+                IntStream.range(0, nodes).filter(j -> adjMatrix[i][j] != 0)
+                  .mapToObj(AdjMatrixGraph.this::getNode);
+            }
+          };
 	}
 
 	@Override

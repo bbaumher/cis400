@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,16 +70,17 @@ public abstract class ReadableGraph<T> {
 	}
 
   /**
-	 * Return a {@link Graph} that contains all of the vertices of {@code graph}
-	 * whose ids are contained in {@code nodes}, as well as all the edges from
-	 * {@code graph} between two such nodes. The new {@link Graph} is backed by
-	 * the passed-in {@link Graph}, and any modifications to either will be seen
-	 * by the other.
+	 * Return a {@link ReadableGraph} that contains all of the vertices of
+   * {@code graph} whose ids are contained in {@code nodes}, as well as all the
+   * edges from {@code graph} between two such nodes. The new
+   * {@link ReadableGraph} is backed by the passed-in {@link ReadableGraph}, and
+   * any modifications to it will be seen in the subgraph.
 	 *
-	 * @param graph The {@link Graph} for which we want to produce a subgraph.
+	 * @param graph The {@link ReadableGraph} for which we want to produce a
+   * subgraph.
 	 * @param nodes The {@link Set} of ids for the nodes that the subgraph
 	 * should contain.
-	 * @return A {@link Graph} over the indicated subset of nodes.
+	 * @return A {@link ReadableGraph} over the indicated subset of nodes.
 	 */
 	static <T> ReadableGraph<T> getSubGraph(
     ReadableGraph<T> graph,
@@ -110,7 +112,7 @@ public abstract class ReadableGraph<T> {
 
 			@Override
 			public ReadableNode<T> getNode(T i) {
-				return wrapNode(graph.getNode(i));
+				return nodes.contains(i) ? wrapNode(graph.getNode(i)) : null;
 			}
 
 			@Override
@@ -135,6 +137,85 @@ public abstract class ReadableGraph<T> {
 								.filter(node -> nodes.contains(node.getId()));
 					}
 				};
+			}
+		};
+	}
+
+  /**
+	 * Return a {@link ReadableGraph} that contains all of the edges of
+   * {@code graph} that are accepted by the provided {@link Predicate}. The new
+   * {@link ReadableGraph} is backed by the passed-in {@link ReadableGraph}, and
+   * any modifications to it will be seen in the subgraph.
+	 *
+	 * @param graph The {@link ReadableGraph} for which we want to produce a
+   * subgraph.
+	 * @param nodes The {@link Set} of ids for the nodes that the subgraph
+	 * should contain.
+	 * @return A {@link ReadableGraph} over the indicated subset of nodes.
+	 */
+	static <T> ReadableGraph<T> getSubGraph(
+    ReadableGraph<T> graph,
+    Predicate<Edge<T>> predicate)
+  {
+		return new ReadableGraph<T>() {
+			@Override
+			public int getNodeCnt() {
+				return graph.getNodeCnt();
+			}
+
+			@Override
+			public List<T> getNeighbors(T node) {
+				return
+					graph.getNeighbors(node)
+						.stream()
+						.filter(
+              neighbor ->
+                predicate.test(
+                  new Edge<>(graph.getNode(node), graph.getNode(neighbor))))
+						.collect(Collectors.toList());
+			}
+
+			@Override
+			public List<T> getInboundNodes(T id) {
+				return
+					graph.getInboundNodes(id)
+						.stream()
+						.filter(
+              neighbor ->
+                predicate.test(
+                  new Edge<>(graph.getNode(neighbor), graph.getNode(id))))
+						.collect(Collectors.toList());
+			}
+
+			@Override
+			public ReadableNode<T> getNode(T i) {
+				return wrapNode(graph.getNode(i));
+			}
+
+			@Override
+			public Stream<ReadableNode<T>> getNodes() {
+				return graph.getNodes().map(this::wrapNode);
+			}
+
+			private ReadableNode<T> wrapNode(ReadableNode<T> node) {
+				return
+          node == null
+            ? null
+            : new ReadableNode<T>(node.getId()) {
+                @Override
+                Set<ReadableNode<T>> getAdjSet() {
+                  return
+                    getAdjStream().collect(Collectors.<ReadableNode<T>>toSet());
+                }
+
+                @Override
+                Stream<? extends ReadableNode<T>> getAdjStream() {
+                  return
+                    node.getAdjStream()
+                      .filter(
+                        neighbor -> predicate.test(new Edge<>(node, neighbor)));
+                }
+              };
 			}
 		};
 	}

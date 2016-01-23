@@ -1,19 +1,19 @@
 
 public class Edge<T> {// for directed graphs if we do that
 	
-	private final Node<T> start;
-	private final Node<T> end;
+	private final ReadableNode<T> start;
+	private final ReadableNode<T> end;
 	
-	public Edge(Node<T> a, Node<T> b) {
+	public Edge(ReadableNode<T> a, ReadableNode<T> b) {
 		start = a;
 		end = b;
 	}
 
-	public Node<T> getStart() {
+	public ReadableNode<T> getStart() {
 		return start;
 	}
 	
-	public Node<T> getEnd() {
+	public ReadableNode<T> getEnd() {
 		return end;
 	}
 

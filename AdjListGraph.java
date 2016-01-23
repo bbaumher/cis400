@@ -6,14 +6,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class AdjListGraph extends Graph<Integer> { // undirected graph
-	
-	int nodes;
 	int nodeCnt;
 	ArrayList<Node<Integer>> nodeList;
 	
 	public AdjListGraph(int n) {
-		nodes = n;
-		nodeCnt = 0;
+		nodeCnt = n;
 		nodeList = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
 			nodeList.add(new AdjListNode(i));
@@ -22,7 +19,7 @@ public class AdjListGraph extends Graph<Integer> { // undirected graph
 
 	@Override
 	public int getNodeCnt() {
-		return nodes;
+		return nodeCnt;
 	}
 	
 	@Override
@@ -35,7 +32,7 @@ public class AdjListGraph extends Graph<Integer> { // undirected graph
 	
 	@Override
 	public void addEdge(Integer i, Integer j) throws IllegalArgumentException {
-		if (i >= nodes || j >= nodes) {
+		if (i >= nodeCnt || j >= nodeCnt) {
 			throw new IllegalArgumentException("bad index");
 		}
 		nodeList.get(i).addEdge(nodeList.get(j));	
@@ -49,7 +46,7 @@ public class AdjListGraph extends Graph<Integer> { // undirected graph
 	
 	@Override
 	public Node<Integer> getNode(Integer index) {
-		return nodeList.get(index);
+		return index < 0 || index >= nodeCnt ? null : nodeList.get(index);
 	}
 
 	@Override
