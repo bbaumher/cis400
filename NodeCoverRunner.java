@@ -10,12 +10,18 @@ public class NodeCoverRunner {
 	private static final double COVER_THRESHOLD = 1; //proportion of nodes to cover
 	
 	private final Random random;
+  private final ProbabilityDistributionAlgorithm.CreditCalculator
+    creditCalculator;
 	
-	NodeCoverRunner(Random random) {
+	NodeCoverRunner(
+    Random random,
+    ProbabilityDistributionAlgorithm.CreditCalculator creditCalculator)
+  {
 		this.random = random;
+    this.creditCalculator = creditCalculator;
 	}
 		
-	public <T> int getCoverTime(Graph<T> g, Node<T> s, int k) {
+	public <T> int getCoverTime(ReadableGraph<T> g, ReadableNode<T> s, int k) {
 		Map<ReadableNode<?>, Map<ReadableNode<?>, Double>> transitions =
       new HashMap<>();
     g.getNodes()
@@ -26,7 +32,7 @@ public class NodeCoverRunner {
             ProbabilityDistributionAlgorithm.getNeighborVector(
               node,
               k,
-              ProbabilityDistributionAlgorithm::calculateCredits)));
+              creditCalculator)));
       
     Iterator<ReadableGraph<T>> iterator =
       SCCTester.getStronglyConnectedComponents(

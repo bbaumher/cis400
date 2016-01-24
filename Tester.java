@@ -12,7 +12,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		main4(args);
+		lollipopCoverTime();
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -27,7 +27,10 @@ public class Tester {
 		for (int i = 1; i <= 100; i++) {
 			testGraph = gg.generateAdjListGraph(1000, 0.010);
 			int coverTime =
-				new NodeCoverRunner(RANDOM)
+				new NodeCoverRunner(
+          RANDOM,
+          ProbabilityDistributionAlgorithm::calculateCredits
+        )
 					.getCoverTime(testGraph, testGraph.getNodes().findAny().get(), k);
 			System.out.println(i + "\t" + coverTime);
 		}
@@ -258,4 +261,27 @@ public class Tester {
 			System.out.println();
 		}
 	}
+
+  private static void lollipopCoverTime() {
+    ReadableGraph<Integer> graph =
+      LollipopGraphGenerator.generateAdjListGraph(200);
+		int k = 3;
+    
+    NodeCoverRunner standardRunner =
+      new NodeCoverRunner(
+        RANDOM,
+        ProbabilityDistributionAlgorithm::calculateCredits4);
+    NodeCoverRunner mixedRunner =
+      new NodeCoverRunner(
+        RANDOM,
+        ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5));
+    System.out.println("Iteration\tStandard cover time\tMixed cover time");
+		for (int i = 1; i <= 100; i++) {
+      ReadableNode<Integer> node = graph.getNodes().findAny().get();
+			int standardCoverTime =
+				standardRunner.getCoverTime(graph, node, k);
+      int mixedCoverTime = mixedRunner.getCoverTime(graph, node, k);
+			System.out.println(i + "\t" + standardCoverTime + "\t" + mixedCoverTime);
+		}
+  }
 }

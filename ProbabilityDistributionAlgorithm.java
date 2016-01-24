@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -188,6 +189,20 @@ public class ProbabilityDistributionAlgorithm {
 		normalize(p); //normalize the probability vector
 		return p;
 	}
+
+  static CreditCalculator getSimpleMixedCalculator(double longDistanceWeight) {
+    return
+      (nodeTiers, referralLog, neighborCount, k) -> {
+        double[] result =
+          calculateCredits(nodeTiers, referralLog, neighborCount, k);
+        for (int i = result.length - 1; i >= 0; i--) {
+          result[i] =
+            result[i] * longDistanceWeight
+              + (1d - longDistanceWeight) / result.length;
+        }
+        return result;
+      };
+  }
 	
 	/** Return the sum of an integer array.
 	 */
