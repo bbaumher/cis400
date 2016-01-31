@@ -63,6 +63,14 @@ final class ConvergenceTester {
 	double convergenceDistance() {
 		return transitionMatrix.distributionRange();
 	}
+
+  /**
+   * Compute, given the worst possible initial probability distribution, the
+   * lowest probability of being on any given node.
+   */
+  double minNodeProbability() {
+    return transitionMatrix.minEntry();
+  }
 	
 	/**
 	 * Compute the ceiling of the log of the number of steps needed to force the

@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		lollipopCoverTime();
+		compareAlgorithms();
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -21,18 +22,26 @@ public class Tester {
 		GraphGenerator gg = new StandardGraphGenerator(RANDOM);
 		Graph<Integer> testGraph;
 		int k = 3;
-		
+
+    System.out.println("Iteration\tStandard cover time\tMixed cover time");
+    NodeCoverRunner standardRunner =
+      new NodeCoverRunner(
+        RANDOM,
+        ProbabilityDistributionAlgorithm::calculateCredits4
+      );
+    NodeCoverRunner mixedRunner =
+      new NodeCoverRunner(
+        RANDOM,
+        ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5));
 		//System.out.println(testGraph);
 		//System.out.println(SCCTester.isStronglyConnected(testGraph));
 		for (int i = 1; i <= 100; i++) {
-			testGraph = gg.generateAdjListGraph(1000, 0.010);
-			int coverTime =
-				new NodeCoverRunner(
-          RANDOM,
-          ProbabilityDistributionAlgorithm::calculateCredits
-        )
-					.getCoverTime(testGraph, testGraph.getNodes().findAny().get(), k);
-			System.out.println(i + "\t" + coverTime);
+			testGraph = gg.generateAdjListGraph(2000, 0.0010);
+      ReadableNode<Integer> startNode = testGraph.getNodes().findAny().get();
+			int standardCoverTime =
+				standardRunner.getCoverTime(testGraph, startNode, k);
+      int mixedCoverTime = mixedRunner.getCoverTime(testGraph, startNode, k);
+			System.out.println(i + "\t" + standardCoverTime + '\t' + mixedCoverTime);
 		}
 	}
 	
@@ -217,17 +226,20 @@ public class Tester {
 	}
 	
 	private static void compareAlgorithms() {
+    Scanner scanner = new Scanner(System.in);
     System.out.print("Number of nodes: ");
-    int nodeCount = new Scanner(System.in).nextInt(10);
+    int nodeCount = scanner.nextInt(10);
+    System.out.print("k: ");
+    int k = scanner.nextInt(10);
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
-		ReadableGraph<Integer> graph =
-			getLargestStronglyConnectedComponent(
-				new StandardGraphGenerator(RANDOM)
-					.generateAdjListGraph(
-						nodeCount,
-						0.01));
 //		ReadableGraph<Integer> graph =
-//      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
+//			getLargestStronglyConnectedComponent(
+//				new StandardGraphGenerator(RANDOM)
+//					.generateAdjListGraph(
+//						nodeCount,
+//						0.01));
+		ReadableGraph<Integer> graph =
+      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
 		List<ConvergenceTester> testers = new ArrayList<>(4);
 		testers.add(
@@ -238,16 +250,19 @@ public class Tester {
 				testers.add(
 					ConvergenceTester.forTransitionMatrix(
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, 3, calculator)));
+							.getTransitionMatrix(graph, k, calculator)));
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits3);
+    addTester.accept(
+      ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5));
 		System.out.println(
 			"Log steps;"
 				+ "Standard random walk;"
 				+ "Exactly k away;"
 				+ "Up to k away;"
-				+ "Up to k away, proportional to distance");
+				+ "Up to k away, proportional to distance;"
+        + "Mixed (0.5)");
 		int logSteps = 0;
 		while (true) {
 			System.out.print(logSteps++);
@@ -264,7 +279,7 @@ public class Tester {
 
   private static void lollipopCoverTime() {
     ReadableGraph<Integer> graph =
-      LollipopGraphGenerator.generateAdjListGraph(200);
+      LollipopGraphGenerator.generateAdjListGraph(100);
 		int k = 3;
     
     NodeCoverRunner standardRunner =
@@ -277,7 +292,9 @@ public class Tester {
         ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5));
     System.out.println("Iteration\tStandard cover time\tMixed cover time");
 		for (int i = 1; i <= 100; i++) {
-      ReadableNode<Integer> node = graph.getNodes().findAny().get();
+      List<ReadableNode<Integer>> nodes =
+        graph.getNodes().collect(Collectors.<ReadableNode<Integer>>toList());
+      ReadableNode<Integer> node = nodes.get(RANDOM.nextInt(nodes.size()));
 			int standardCoverTime =
 				standardRunner.getCoverTime(graph, node, k);
       int mixedCoverTime = mixedRunner.getCoverTime(graph, node, k);

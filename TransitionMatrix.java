@@ -169,4 +169,17 @@ class TransitionMatrix {
     double max = streamSupplier.get().max().getAsDouble();
     return max - min;
   }
+
+  /**
+   * Return the value in the minimum cell in the matrix.
+   */
+  double minEntry() {
+    return
+      Arrays.stream(transitionVectors)
+        .mapToDouble(
+          vector ->
+            Arrays.stream(vector).min().orElse(Double.POSITIVE_INFINITY))
+        .min()
+        .orElse(Double.POSITIVE_INFINITY);
+  }
 }

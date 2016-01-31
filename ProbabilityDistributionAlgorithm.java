@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -145,7 +144,7 @@ public class ProbabilityDistributionAlgorithm {
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		
-		for (int t = 2; t <= k; t++) {
+		for (int t = 1; t <= k; t++) {
 			Set<ReadableNode<?>> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
 			//each node has 1 credit, which is split proportionally to its referrals
 			for (ReadableNode<?> v : tier) {
@@ -166,7 +165,7 @@ public class ProbabilityDistributionAlgorithm {
 			ReferralLog referralLog, int neighborCount, int k) {
 		double[] p = new double[neighborCount]; //instantiate the output array
 		
-		for (int t = 2; t <= k; t++) {
+		for (int t = 1; t <= k; t++) {
 			Set<ReadableNode<?>> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
 			//each node has 1 credit, which is split proportionally to its referrals
 			for (ReadableNode<?> v : tier) {

@@ -213,7 +213,8 @@ public abstract class ReadableGraph<T> {
                   return
                     node.getAdjStream()
                       .filter(
-                        neighbor -> predicate.test(new Edge<>(node, neighbor)));
+                        neighbor -> predicate.test(new Edge<>(node, neighbor)))
+                      .map(node -> wrapNode(node));
                 }
               };
 			}
