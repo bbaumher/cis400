@@ -1,3 +1,4 @@
+package graph;
 /**
  * A class for testing how quickly a Markov chain converges to a stationary
  * distribution.

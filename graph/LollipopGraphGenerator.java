@@ -1,3 +1,4 @@
+package graph;
 /**
  * A class for generating lollipop graphs.
  */

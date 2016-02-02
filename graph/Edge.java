@@ -1,3 +1,4 @@
+package graph;
 
 public class Edge<T> {// for directed graphs if we do that
 	

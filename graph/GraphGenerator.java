@@ -1,3 +1,4 @@
+package graph;
 
 public interface GraphGenerator {
 	
