@@ -1,5 +1,6 @@
 package graph;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProbabilityDistributionAlgorithm {
 	/**
@@ -89,6 +91,82 @@ public class ProbabilityDistributionAlgorithm {
 	}
 	
 	/**
+	 * The k credit algorithm. **addendum: spread credits amongst paths
+	 * 
+	 * @param s the starting node
+	 * @param k we consider nodes up to k away from the starting node
+	 * @param creditCalculator The function used to compute the transition
+	 * probabilities after the traversal is complete.
+	 * @return 
+	 * @TODO change the name of this method / modularize????
+	 */
+	public static Map<ReadableNode<?>, Double> getNeighborVector2(
+		ReadableNode<?> s,
+		int k,
+		CreditCalculator creditCalculator)
+	{
+		Set<ReadableNode<?>> seenNodes = new HashSet<>(); //the nodes that no longer need to be considered
+		Queue<ReadableNode<?>> nodeQueue = new LinkedList<>(); //the nodes on the current layer of the BFS
+		Set<ReadableNode<?>> pendingNodes = new HashSet<>(); //the the nodes being discovered on the edge of the BFS
+		List<ReadableNode<?>> adjList = new ArrayList<>(); //the number of neighbors of the starting node
+		adjList.addAll(s.getAdjSet());
+		ArrayList<Set<ReadableNode<?>>> nodeTiers = new ArrayList<>(); //a list of sets of nodes, each set containing nodes i away from s
+		ReferralLog referralLog = new ReferralLog(adjList); //a map from each node to its referral array
+    
+    //give each of s's neighbors a 1 in its corresponding referral array
+    for (ReadableNode<?> v : adjList) {
+      referralLog.setValue(v, v, 1);
+      pendingNodes.add(v);
+    }
+		
+		//perform logistics on s as the zeroth tier
+		seenNodes.add(s);
+		Set<ReadableNode<?>> zerothTier = new HashSet<>();
+		zerothTier.add(s);
+		nodeTiers.add(zerothTier);
+		
+		//perform a BFS, filling out the nodeTiers and keeping track of referrals
+		for (int i = 0; i < k-1; i++) {
+			seenNodes.addAll(pendingNodes); //archive the nodes seen last round
+			nodeQueue.addAll(pendingNodes); //the nodes discovered last round are next
+			nodeTiers.add(pendingNodes); //add the pending nodes to the nodeTiers
+			pendingNodes = new HashSet<>(); //reset the pending nodes
+			Collection<ReadableNode<?>> forwardNodes; // storing all the future paths
+			
+			//iterate through each node in the queue
+			while (!nodeQueue.isEmpty()) {
+				ReadableNode<?> v = nodeQueue.poll();
+				
+				//examine each of the node's neighbors
+				
+				forwardNodes
+		          = v.getAdjStream()
+		              .filter(node -> !seenNodes.contains(node))
+		              .collect(Collectors.<ReadableNode<?>>toList());
+
+		          
+				pendingNodes.addAll(forwardNodes);
+				referralLog.addValuesOnto(v,forwardNodes); //propagate the referrals (ayyeee)
+			}
+		}
+		
+		//add the final tier to the nodeTiers
+		nodeTiers.add(pendingNodes);
+		
+		//perform and return some algorithm to determine credits
+		double[] p =
+			creditCalculator.apply(nodeTiers, referralLog, adjList.size(), k);
+		
+		Map<ReadableNode<?>, Double> result = new HashMap<>(adjList.size());
+		int index = 0;
+		for (ReadableNode<?> node : adjList) {
+			result.put(node, p[index++]);
+		}
+		return result;
+	}
+
+	
+	/**
 	 * The k credit algorithm.
 	 * 
 	 * @param graph the graph on which to run the algorithm
@@ -129,7 +207,7 @@ public class ProbabilityDistributionAlgorithm {
 		
 		//each node has 1 credit, which is split proportionally to its referrals
 		for (ReadableNode<?> v : edgeNodes) {
-			int[] referrals = referralLog.getReferral(v);
+			double[] referrals = referralLog.getReferral(v);
 			for (int i = 0; i < referrals.length; i++) {
 				double sum = sum(referrals);
 				p[i] += referrals[i] / sum;
@@ -149,7 +227,7 @@ public class ProbabilityDistributionAlgorithm {
 			Set<ReadableNode<?>> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
 			//each node has 1 credit, which is split proportionally to its referrals
 			for (ReadableNode<?> v : tier) {
-				int[] referrals = referralLog.getReferral(v);
+				double[] referrals = referralLog.getReferral(v);
 				for (int i = 0; i < referrals.length; i++) {
 					double sum = sum(referrals);
 					p[i] += referrals[i] / sum;
@@ -170,7 +248,7 @@ public class ProbabilityDistributionAlgorithm {
 			Set<ReadableNode<?>> tier = nodeTiers.get(t); //get the each tier (i.e. nodes i away from s)
 			//each node has 1 credit, which is split proportionally to its referrals
 			for (ReadableNode<?> v : tier) {
-				int[] referrals = referralLog.getReferral(v);
+				double[] referrals = referralLog.getReferral(v);
 				for (int i = 0; i < referrals.length; i++) {
 					double sum = sum(referrals);
 					p[i] += referrals[i] / sum * t;

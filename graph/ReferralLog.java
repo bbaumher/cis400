@@ -1,4 +1,5 @@
 package graph;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +18,16 @@ import java.util.stream.IntStream;
  * - 0 shortest path(s) from s to v that pass through neighbor 0
  * - 2 shortest path(s) from s to v that pass through neighbor 2
  * - 1 shortest path(s) from s to v that pass through neighbor 1
+ * 
+ * 
+ * NOTE: CHANGING TO DOUBLE FROM INT :)
  */
 
 public class ReferralLog {
 	// A Map from the neighbors to the index of that node in the int[]s.
 	private final Map<ReadableNode<?>, Integer> neighborToIndexMap =
     new HashMap<>();
-	Map<ReadableNode<?>,int[]> referralMap; //the actual mapping from Node to int[]
+	Map<ReadableNode<?>,double[]> referralMap; //the actual mapping from Node to int[]
 	
 	/** Construct a ReferralLog by storing the neighbors and
 	 *  instantiating the map.
@@ -41,12 +45,12 @@ public class ReferralLog {
 	 *  If it doesn't have one yet, then an empty one is created,
 	 *  added to the mapping, and returned.
 	 */
-	public int[] getReferral(ReadableNode<?> node) {
+	public double[] getReferral(ReadableNode<?> node) {
 		if (referralMap.containsKey(node)) { //node already has a referral array
 			return referralMap.get(node);
 		}
 		else { //node doesn't have a referral array yet
-			int[] emptyReferral = new int[neighborToIndexMap.size()];
+			double[] emptyReferral = new double[neighborToIndexMap.size()];
 			referralMap.put(node, emptyReferral);
 			return emptyReferral;
 		}
@@ -60,7 +64,7 @@ public class ReferralLog {
     ReadableNode<?> centralNeighbor,
     int value)
   {
-		int[] values = getReferral(fringeNode);
+		double[] values = getReferral(fringeNode);
 		values[neighborToIndexMap.get(centralNeighbor)] = value;
 	}
 	
@@ -68,12 +72,27 @@ public class ReferralLog {
 	 *  referral array of node2.
 	 */
 	public void addValuesOnto(ReadableNode<?> node1, ReadableNode<?> node2) {
-		int[] node1ref = getReferral(node1);
-		int[] node2ref = getReferral(node2);
+		double[] node1ref = getReferral(node1);
+		double[] node2ref = getReferral(node2);
 		for (int i = 0; i < neighborToIndexMap.size(); i++) {
 			node2ref[i] = node1ref[i] + node2ref[i];
 		}
 	}
+	
+	/**
+	 * Distribute the values of node1's referral array evenly amongst
+	 * the set of nodes
+	 */
+	public void addValuesOnto(ReadableNode<?> node1, Collection<ReadableNode<?>> forwardNeighbors) {
+		double[] node1ref = getReferral(node1);
+		for (ReadableNode<?> node2 : forwardNeighbors) {
+			double[] node2ref = getReferral(node2);
+			for (int i = 0; i < neighborToIndexMap.size(); i++) {
+				node2ref[i] = node1ref[i]/forwardNeighbors.size() + node2ref[i];
+			}	
+		}
+	}
+	
 	
 	/** Represent this class by showing the int[] corresponding
 	 *  to each of the nodes.
@@ -83,7 +102,7 @@ public class ReferralLog {
 		StringBuilder buf = new StringBuilder();
 		for (ReadableNode<?> v : referralMap.keySet()) {
 			buf.append(v).append(" = ");
-			for (int value : getReferral(v)) {
+			for (double value : getReferral(v)) {
 				buf.append(value).append(" ");
 			}
 			buf.append("\n");

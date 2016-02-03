@@ -135,7 +135,7 @@ public abstract class ReadableGraph<T> {
 					Stream<? extends ReadableNode<T>> getAdjStream() {
 						return
 							node.getAdjStream()
-								.filter(node -> nodes.contains(node.getId()));
+								.filter(n -> nodes.contains(n.getId()));
 					}
 				};
 			}
@@ -215,7 +215,7 @@ public abstract class ReadableGraph<T> {
                     node.getAdjStream()
                       .filter(
                         neighbor -> predicate.test(new Edge<>(node, neighbor)))
-                      .map(node -> wrapNode(node));
+                      .map(n -> wrapNode(n));
                 }
               };
 			}
