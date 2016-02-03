@@ -1,5 +1,6 @@
 package matchings;
 
+import graph.AdjListGraph;
 
 public class MatchingGraph extends Graph {
 
@@ -28,6 +29,20 @@ public class MatchingGraph extends Graph {
 		}
 		
 		return buf.toString();
+	}
+	
+	public AdjListGraph toAdjListGraph() {
+		AdjListGraph output = new AdjListGraph(this.getNodeCount());
+		
+		for (int i = 0; i < this.getNodeCount(); i++) {
+			for (int j = i+1; j < this.getNodeCount(); j++) {
+				Node n1 = this.getNodeIndexedAt(i);
+				Node n2 = this.getNodeIndexedAt(j);
+				if (n1.hasEdgeTo(n2)) output.addEdge(i, j);
+			}
+		}
+		
+		return output;
 	}
 
 }
