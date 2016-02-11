@@ -5,8 +5,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+
+import graph.CustomizableGraph;
+import graph.CustomizableNode;
+import graph.Node;
 
 public class MatchingGraphGenerator {
 	
@@ -52,14 +57,67 @@ public class MatchingGraphGenerator {
 		return matchingGraph;
 	}
 	
-	public static<E> graph.Graph<E> generate(graph.Graph<E> graph) {
-		Stream<graph.Node<E>> stream = graph.getNodes();
-		Iterator<graph.Node<E>> iter = stream.iterator();
-		while (iter.hasNext()) {
-			graph.Node<E> node = iter.next();
+public static CustomizableGraph<Matching> generate2(Graph graph) {
+		
+		//get an arbitrary matching of the graph
+		Matching arbitraryMatching = new Matching(graph);
+		arbitraryMatching.fill();
+		
+		//create the matching graph and its first node
+		CustomizableGraph<Matching> matchingGraph = new CustomizableGraph<Matching>();
+		CustomizableNode<Matching> arbitraryMatchingNode = matchingGraph.addNode(arbitraryMatching);
+		
+		//these will help do a BFS to create the matching graph
+		Queue<CustomizableNode<Matching>> queueMatchings = new LinkedList<CustomizableNode<Matching>>();
+		Map<Matching,CustomizableNode<Matching>> mapMatchings = new TreeMap<Matching,CustomizableNode<Matching>>();
+		queueMatchings.add(arbitraryMatchingNode);
+		mapMatchings.put(arbitraryMatching, arbitraryMatchingNode);
+		
+		while (!queueMatchings.isEmpty()) {
+			//dequeue the matching node and extract relevant fields
+			CustomizableNode<Matching> dequeuedMatchingNode = queueMatchings.poll();
+			Matching dequeuedMatching = dequeuedMatchingNode.getId();
+			ArrayList<Matching> neighborMatchings = dequeuedMatching.getNeighborMatchings();
 			
+			for (Matching neighborMatching : neighborMatchings) {
+				if (!mapMatchings.containsKey(neighborMatching)) { //haven't seen this matching before
+					CustomizableNode<Matching> neighborMatchingNode = matchingGraph.addNode(neighborMatching);
+					matchingGraph.addEdge(dequeuedMatchingNode.getId(), neighborMatchingNode.getId());
+					
+					mapMatchings.put(neighborMatching, neighborMatchingNode);
+					queueMatchings.add(neighborMatchingNode);
+				}
+				else { //have seen this matching before
+					CustomizableNode<Matching> neighborMatchingNode = mapMatchings.get(neighborMatching);
+					matchingGraph.addEdge(dequeuedMatchingNode.getId(), neighborMatchingNode.getId());
+				}
+			}
 		}
-		return null;
+	
+		return matchingGraph;
+	}
+	
+	public static graph.Graph<Matching> generate(graph.AdjListGraph graph) {
+		Graph newGraph = new Graph(graph.getNodeCnt());
+		
+		Stream<graph.Node<Integer>> stream = graph.getNodes();
+		Iterator<graph.Node<Integer>> iter = stream.iterator();
+		while (iter.hasNext()) {
+			graph.Node<Integer> node = iter.next();
+			Set<Node<Integer>> neighbors = graph.getNeighbors(node);
+			int n = node.getId();
+			for (Node<Integer> neighbor : neighbors) {
+				int m = neighbor.getId();
+				if (n < m) {
+					matchings.Node node1 = newGraph.getNodeIndexedAt(n);
+					matchings.Node node2 = newGraph.getNodeIndexedAt(m);
+					newGraph.addEdgeBetweenNodes(node1, node2);
+				}
+			}
+		}
+		
+		return generate2(newGraph);
+		
 	}
 
 }

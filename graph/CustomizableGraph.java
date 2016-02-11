@@ -29,10 +29,11 @@ public class CustomizableGraph<T> extends Graph<T> {
 		
 	}
 	
-	public void addNode(T t) {
-		Node<T> node = new CustomizableNode<T>(t);
+	public CustomizableNode<T> addNode(T t) {
+		CustomizableNode<T> node = new CustomizableNode<T>(t);
 		nodes.add(node);
 		map.put(t, node);
+		return node;
 	}
 
 	@Override
