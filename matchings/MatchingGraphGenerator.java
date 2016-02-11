@@ -1,10 +1,12 @@
 package matchings;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 public class MatchingGraphGenerator {
 	
@@ -48,6 +50,16 @@ public class MatchingGraphGenerator {
 		}
 	
 		return matchingGraph;
+	}
+	
+	public static<E> graph.Graph<E> generate(graph.Graph<E> graph) {
+		Stream<graph.Node<E>> stream = graph.getNodes();
+		Iterator<graph.Node<E>> iter = stream.iterator();
+		while (iter.hasNext()) {
+			graph.Node<E> node = iter.next();
+			
+		}
+		return null;
 	}
 
 }
