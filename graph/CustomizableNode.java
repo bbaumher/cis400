@@ -13,7 +13,7 @@ public class CustomizableNode<T> extends Node<T> {
 		neighbors = new HashSet<>();
 	}
 
-	void addEdge(CustomizableNode<T> n) {
+	void addUndirectedEdge(CustomizableNode<T> n) {
 		this.neighbors.add(n);
 		n.neighbors.add(this);
 	}
@@ -28,9 +28,9 @@ public class CustomizableNode<T> extends Node<T> {
 		return neighbors.stream();
 	}
 
-	@Override @Deprecated
+	@Override
 	void addEdge(Node<T> a) {
-
+		this.neighbors.add(a);
 	}
 
 }

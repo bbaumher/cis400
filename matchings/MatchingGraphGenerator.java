@@ -82,14 +82,14 @@ public static CustomizableGraph<Matching> generate2(Graph graph) {
 			for (Matching neighborMatching : neighborMatchings) {
 				if (!mapMatchings.containsKey(neighborMatching)) { //haven't seen this matching before
 					CustomizableNode<Matching> neighborMatchingNode = matchingGraph.addNode(neighborMatching);
-					matchingGraph.addEdge(dequeuedMatchingNode.getId(), neighborMatchingNode.getId());
+					matchingGraph.addUndirectedEdge(dequeuedMatchingNode.getId(), neighborMatchingNode.getId());
 					
 					mapMatchings.put(neighborMatching, neighborMatchingNode);
 					queueMatchings.add(neighborMatchingNode);
 				}
 				else { //have seen this matching before
 					CustomizableNode<Matching> neighborMatchingNode = mapMatchings.get(neighborMatching);
-					matchingGraph.addEdge(dequeuedMatchingNode.getId(), neighborMatchingNode.getId());
+					matchingGraph.addUndirectedEdge(dequeuedMatchingNode.getId(), neighborMatchingNode.getId());
 				}
 			}
 		}
