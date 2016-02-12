@@ -1,17 +1,16 @@
 package graph;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
 public class CustomizableNode<T> extends Node<T> {
 	
-	private ArrayList<Node<T>> neighbors;
+	private Set<Node<T>> neighbors;
 
 	public CustomizableNode(T id) {
 		super(id);
-		neighbors = new ArrayList<Node<T>>();
+		neighbors = new HashSet<>();
 	}
 
 	void addEdge(CustomizableNode<T> n) {
@@ -21,17 +20,12 @@ public class CustomizableNode<T> extends Node<T> {
 
 	@Override
 	Set<Node<T>> getAdjSet() {
-		Set<Node<T>> set = new HashSet<Node<T>>();
-		for (Node<T> n : neighbors) {
-			set.add(n);
-		}
-		return set;
+		return new HashSet<>(neighbors);
 	}
 
-	@Override @Deprecated
+	@Override
 	Stream<Node<T>> getAdjStream() {
-		// TODO Auto-generated method stub
-		return null;
+		return neighbors.stream();
 	}
 
 	@Override @Deprecated
