@@ -22,12 +22,17 @@ public class CustomizableGraph<T> extends Graph<T> {
 	@Override @Deprecated
 	public Node<T> addNode() {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Can't call add node with no input.");
 	}
 	
 	@Override
-	public void addEdge(Node<T> i, Node<T> j) {
-		addEdge(i.getId(), j.getId());
+	public void addEdge(Node<T> ni, Node<T> nj) {
+		ni.addEdge(nj);
+	}
+	
+	public void addUndirectedEdge(Node<T> ni, Node<T> nj) {
+		ni.addEdge(nj);
+		nj.addEdge(ni);
 	}
 	
 	public CustomizableNode<T> addNode(T t) {
@@ -41,7 +46,13 @@ public class CustomizableGraph<T> extends Graph<T> {
 	public void addEdge(T i, T j) {
 		Node<T> ni = map.get(i);
 		Node<T> nj = map.get(j);
-		ni.addEdge(nj);
+		addEdge(ni,nj);
+	}
+	
+	public void addUndirectedEdge(T i, T j) {
+		Node<T> ni = map.get(i);
+		Node<T> nj = map.get(j);
+		addUndirectedEdge(ni,nj);
 	}
 
 	@Override
