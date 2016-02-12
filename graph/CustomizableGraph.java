@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CustomizableGraph<T> extends Graph<T> {
@@ -23,10 +25,9 @@ public class CustomizableGraph<T> extends Graph<T> {
 		return null;
 	}
 	
-	@Override @Deprecated
+	@Override
 	public void addEdge(Node<T> i, Node<T> j) {
-		// TODO Auto-generated method stub
-		
+		addEdge(i.getId(), j.getId());
 	}
 	
 	public CustomizableNode<T> addNode(T t) {
@@ -70,11 +71,13 @@ public class CustomizableGraph<T> extends Graph<T> {
 
 	@Override
 	public List<T> getInboundNodes(T id) {
-		List<T> ts = new ArrayList<T>();
-		for (Node<T> n : nodes) {
-			ts.add(n.getId());
-		}
-		return ts;
+		return
+      getNodes()
+        .filter(
+          node ->
+            node.getAdjStream().anyMatch(n -> Objects.equals(n.getId(), id)))
+        .map(ReadableNode::getId)
+        .collect(Collectors.<T>toList());
 	}
 
 }
