@@ -21,8 +21,18 @@ public class NodeCoverRunner {
 		this.random = random;
     this.creditCalculator = creditCalculator;
 	}
-		
-	public <T> int getCoverTime(ReadableGraph<T> g, ReadableNode<T> s, int k) {
+
+  /**
+   * @param splittingWeights {@code true} if weights should be divided between
+   * forward neighbors when they are being distributed (rather than added to all
+   * of them at full value).
+   */
+	public <T> int getCoverTime(
+    ReadableGraph<T> g,
+    ReadableNode<T> s,
+    int k,
+    boolean splittingWeights)
+  {
 		Map<ReadableNode<?>, Map<ReadableNode<?>, Double>> transitions =
       new HashMap<>();
     g.getNodes()
@@ -33,7 +43,8 @@ public class NodeCoverRunner {
             ProbabilityDistributionAlgorithm.getNeighborVector(
               node,
               k,
-              creditCalculator)));
+              creditCalculator,
+              splittingWeights)));
       
     Iterator<ReadableGraph<T>> iterator =
       SCCTester.getStronglyConnectedComponents(
