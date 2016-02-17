@@ -1,5 +1,7 @@
 package graph;
 
+import graph.ProbabilityDistributionAlgorithm.Method;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -40,9 +42,9 @@ public class Tester {
 			testGraph = gg.generateAdjListGraph(2000, 0.0010);
       ReadableNode<Integer> startNode = testGraph.getNodes().findAny().get();
 			int standardCoverTime =
-				standardRunner.getCoverTime(testGraph, startNode, k, false);
+				standardRunner.getCoverTime(testGraph, startNode, k, Method.CLONING);
       int mixedCoverTime =
-        mixedRunner.getCoverTime(testGraph, startNode, k, false);
+        mixedRunner.getCoverTime(testGraph, startNode, k, Method.CLONING);
 			System.out.println(i + "\t" + standardCoverTime + '\t' + mixedCoverTime);
 		}
 	}
@@ -135,7 +137,7 @@ public class Tester {
 					largestComponent,
 					3,
 					ProbabilityDistributionAlgorithm::calculateCredits,
-          false);
+          Method.CLONING);
 		
 		//display the output
 		print(transitionMatrix.getTransitionVectors());
@@ -211,7 +213,7 @@ public class Tester {
 					graph,
 					2,
 					ProbabilityDistributionAlgorithm::calculateCredits,
-          false);
+          Method.CLONING);
 		print(transitionMatrix.getTransitionVectors());
 	}
 	
@@ -226,7 +228,7 @@ public class Tester {
 					graph,
 					k,
 					ProbabilityDistributionAlgorithm::calculateCredits,
-          false);
+          Method.CLONING);
 		print(transitionMatrix.getTransitionVectors());
 	}
 	
@@ -255,7 +257,7 @@ public class Tester {
 				testers.add(
 					ConvergenceTester.forTransitionMatrix(
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, k, calculator, false)));
+							.getTransitionMatrix(graph, k, calculator, Method.CLONING)));
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits3);
@@ -301,8 +303,8 @@ public class Tester {
         graph.getNodes().collect(Collectors.<ReadableNode<Integer>>toList());
       ReadableNode<Integer> node = nodes.get(RANDOM.nextInt(nodes.size()));
 			int standardCoverTime =
-				standardRunner.getCoverTime(graph, node, k, false);
-      int mixedCoverTime = mixedRunner.getCoverTime(graph, node, k, false);
+				standardRunner.getCoverTime(graph, node, k, Method.CLONING);
+      int mixedCoverTime = mixedRunner.getCoverTime(graph, node, k, Method.CLONING);
 			System.out.println(i + "\t" + standardCoverTime + "\t" + mixedCoverTime);
 		}
   }

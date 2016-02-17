@@ -1,4 +1,6 @@
 package graph;
+import graph.ProbabilityDistributionAlgorithm.Method;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,7 +33,7 @@ public class NodeCoverRunner {
     ReadableGraph<T> g,
     ReadableNode<T> s,
     int k,
-    boolean splittingWeights)
+    Method method)
   {
 		Map<ReadableNode<?>, Map<ReadableNode<?>, Double>> transitions =
       new HashMap<>();
@@ -44,7 +46,7 @@ public class NodeCoverRunner {
               node,
               k,
               creditCalculator,
-              splittingWeights)));
+              method)));
       
     Iterator<ReadableGraph<T>> iterator =
       SCCTester.getStronglyConnectedComponents(
