@@ -1,4 +1,6 @@
 package graph;
+import graph.ProbabilityDistributionAlgorithm.Method;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,18 +16,18 @@ public class NodeCoverRunner {
   private final ProbabilityDistributionAlgorithm.CreditCalculator
     creditCalculator;
   private final int k;
-  private final boolean splittingWeights;
+  private final Method method;
 	
 	NodeCoverRunner(
     Random random,
     ProbabilityDistributionAlgorithm.CreditCalculator creditCalculator,
     int k,
-    boolean splittingWeights)
+    Method method)
   {
 		this.random = random;
     this.creditCalculator = creditCalculator;
     this.k = k;
-    this.splittingWeights = splittingWeights;
+    this.method = method;
 	}
 
   /**
@@ -45,7 +47,7 @@ public class NodeCoverRunner {
               node,
               k,
               creditCalculator,
-              splittingWeights)));
+              method)));
       
     Iterator<ReadableGraph<T>> iterator =
       SCCTester.getStronglyConnectedComponents(

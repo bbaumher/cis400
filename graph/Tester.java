@@ -1,5 +1,7 @@
 package graph;
 
+import graph.ProbabilityDistributionAlgorithm.Method;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -32,14 +34,14 @@ public class Tester {
         RANDOM,
         ProbabilityDistributionAlgorithm::calculateCredits4,
         k,
-        false
+        Method.CLONING
       );
     NodeCoverRunner mixedRunner =
       new NodeCoverRunner(
         RANDOM,
         ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5),
         k,
-        false);
+        Method.CLONING);
 		//System.out.println(testGraph);
 		//System.out.println(SCCTester.isStronglyConnected(testGraph));
 		for (int i = 1; i <= 100; i++) {
@@ -141,7 +143,7 @@ public class Tester {
 					largestComponent,
 					3,
 					ProbabilityDistributionAlgorithm::calculateCredits,
-          false);
+          Method.CLONING);
 		
 		//display the output
 		print(transitionMatrix.getTransitionVectors());
@@ -217,7 +219,7 @@ public class Tester {
 					graph,
 					2,
 					ProbabilityDistributionAlgorithm::calculateCredits,
-          false);
+          Method.CLONING);
 		print(transitionMatrix.getTransitionVectors());
 	}
 	
@@ -232,7 +234,7 @@ public class Tester {
 					graph,
 					k,
 					ProbabilityDistributionAlgorithm::calculateCredits,
-          false);
+          Method.CLONING);
 		print(transitionMatrix.getTransitionVectors());
 	}
 	
@@ -266,11 +268,12 @@ public class Tester {
 				testers.add(
 					ConvergenceTester.forTransitionMatrix(
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, k, calculator, false)));
+							.getTransitionMatrix(graph, k, calculator, Method.CLONING)));
         testers.add(
 					ConvergenceTester.forTransitionMatrix(
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, k, calculator, true)));
+							.getTransitionMatrix(graph, k, calculator, Method.FORWARD_SPLIT))
+        );
       };
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
@@ -315,13 +318,13 @@ public class Tester {
         RANDOM,
         ProbabilityDistributionAlgorithm::calculateCredits4,
         k,
-        false));
+        Method.CLONING));
 		Consumer<ProbabilityDistributionAlgorithm.CreditCalculator> addTester =
 			calculator -> {
 				runners.add(
-					new NodeCoverRunner(RANDOM, calculator, k, false));
+					new NodeCoverRunner(RANDOM, calculator, k, Method.CLONING));
         runners.add(
-					new NodeCoverRunner(RANDOM, calculator, k, true));
+					new NodeCoverRunner(RANDOM, calculator, k, Method.FORWARD_SPLIT));
       };
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
@@ -367,13 +370,13 @@ public class Tester {
         RANDOM,
         ProbabilityDistributionAlgorithm::calculateCredits4,
         k,
-        false);
+        Method.CLONING);
     NodeCoverRunner mixedRunner =
       new NodeCoverRunner(
         RANDOM,
         ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5),
         k,
-        false);
+        Method.CLONING);
     System.out.println("Iteration\tStandard cover time\tMixed cover time");
 		for (int i = 1; i <= 100; i++) {
       List<ReadableNode<Integer>> nodes =

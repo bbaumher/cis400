@@ -111,9 +111,9 @@ public static CustomizableGraph<Matching> generate2(Graph graph) {
 			int n = node.getId();
 			for (graph.ReadableNode<Integer> neighbor : neighbors) {
 				int m = neighbor.getId();
-				if (n < m) {
-					matchings.Node node1 = newGraph.getNodeIndexedAt(n);
-					matchings.Node node2 = newGraph.getNodeIndexedAt(m);
+				matchings.Node node1 = newGraph.getNodeIndexedAt(n);
+				matchings.Node node2 = newGraph.getNodeIndexedAt(m);
+				if (!node1.hasEdgeTo(node2)) {
 					newGraph.addEdgeBetweenNodes(node1, node2);
 				}
 			}

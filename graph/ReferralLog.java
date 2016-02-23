@@ -83,12 +83,12 @@ public class ReferralLog {
 	 * Distribute the values of node1's referral array evenly amongst
 	 * the set of nodes
 	 */
-	public void addValuesOnto(ReadableNode<?> node1, Collection<ReadableNode<?>> forwardNeighbors) {
+	public void addValuesOnto(ReadableNode<?> node1, Collection<ReadableNode<?>> forwardNeighbors, int degree) {
 		double[] node1ref = getReferral(node1);
 		for (ReadableNode<?> node2 : forwardNeighbors) {
 			double[] node2ref = getReferral(node2);
 			for (int i = 0; i < neighborToIndexMap.size(); i++) {
-				node2ref[i] = node1ref[i]/forwardNeighbors.size() + node2ref[i];
+				node2ref[i] = node1ref[i]/degree + node2ref[i];
 			}	
 		}
 	}
