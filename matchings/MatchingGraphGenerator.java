@@ -97,16 +97,19 @@ public static CustomizableGraph<Matching> generate2(Graph graph) {
 		return matchingGraph;
 	}
 	
-	public static graph.Graph<Matching> generate(graph.AdjListGraph graph) {
+	public static graph.Graph<Matching> generate(
+    graph.ReadableGraph<Integer> graph)
+  {
 		Graph newGraph = new Graph(graph.getNodeCnt());
 		
-		Stream<graph.Node<Integer>> stream = graph.getNodes();
-		Iterator<graph.Node<Integer>> iter = stream.iterator();
+		Stream<? extends graph.ReadableNode<Integer>> stream = graph.getNodes();
+		Iterator<? extends graph.ReadableNode<Integer>> iter = stream.iterator();
 		while (iter.hasNext()) {
-			graph.Node<Integer> node = iter.next();
-			Set<Node<Integer>> neighbors = graph.getNeighbors(node);
+			graph.ReadableNode<Integer> node = iter.next();
+			Set<? extends graph.ReadableNode<Integer>> neighbors =
+        graph.getNeighbors(node);
 			int n = node.getId();
-			for (Node<Integer> neighbor : neighbors) {
+			for (graph.ReadableNode<Integer> neighbor : neighbors) {
 				int m = neighbor.getId();
 				if (n < m) {
 					matchings.Node node1 = newGraph.getNodeIndexedAt(n);

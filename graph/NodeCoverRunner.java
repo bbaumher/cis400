@@ -13,13 +13,19 @@ public class NodeCoverRunner {
 	private final Random random;
   private final ProbabilityDistributionAlgorithm.CreditCalculator
     creditCalculator;
+  private final int k;
+  private final boolean splittingWeights;
 	
 	NodeCoverRunner(
     Random random,
-    ProbabilityDistributionAlgorithm.CreditCalculator creditCalculator)
+    ProbabilityDistributionAlgorithm.CreditCalculator creditCalculator,
+    int k,
+    boolean splittingWeights)
   {
 		this.random = random;
     this.creditCalculator = creditCalculator;
+    this.k = k;
+    this.splittingWeights = splittingWeights;
 	}
 
   /**
@@ -27,12 +33,7 @@ public class NodeCoverRunner {
    * forward neighbors when they are being distributed (rather than added to all
    * of them at full value).
    */
-	public <T> int getCoverTime(
-    ReadableGraph<T> g,
-    ReadableNode<T> s,
-    int k,
-    boolean splittingWeights)
-  {
+	public <T> int getCoverTime(ReadableGraph<T> g, ReadableNode<T> s) {
 		Map<ReadableNode<?>, Map<ReadableNode<?>, Double>> transitions =
       new HashMap<>();
     g.getNodes()
