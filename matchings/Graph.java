@@ -87,6 +87,11 @@ public class Graph {
 		this.edgeList.add(e);
 	}
 	
+	//won't add an edge if there's already one there
+	public void addEdgeBetweenNodes(int i1, int i2) {
+		addEdgeBetweenNodes(getNodeIndexedAt(i1),getNodeIndexedAt(i2));
+	}
+	
 	public void addNode(Node node) {
 		nodeList.add(node);
 	}

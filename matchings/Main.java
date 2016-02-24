@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import graph.Graph;
-
 public class Main {
 
 	public static void main(String[] args) {
@@ -18,15 +16,22 @@ public class Main {
 		//Graph graph = new Graph(4, 'b');
 		
 		
-		/*
-		Graph graph = new Graph(12, 0.5);
+		
+		Graph graph = new Graph(6);
+		graph.addEdgeBetweenNodes(0,1);
+		graph.addEdgeBetweenNodes(1,2);
+		graph.addEdgeBetweenNodes(3,4);
+		graph.addEdgeBetweenNodes(4,5);
+		graph.addEdgeBetweenNodes(0,3);
+		graph.addEdgeBetweenNodes(1,4);
+		graph.addEdgeBetweenNodes(2,5);
 		
 		MatchingGraph matchingGraph = MatchingGraphGenerator.generate(graph);
 		
 		GraphAssessor.assess(graph);
 		System.out.println();
 		GraphAssessor.assess(matchingGraph);
-		*/
+		
 		
 		
 		/*
@@ -42,6 +47,7 @@ public class Main {
 		*/
 		//System.out.println(matchingGraph);
 		
+		/*
 		graph.AdjListGraph graph = new graph.AdjListGraph(4);
 		graph.addEdge(0,1);
 		graph.addEdge(1,2);
@@ -49,8 +55,9 @@ public class Main {
 		graph.addEdge(3,0);
 		graph.printGraph();
 		
+		
 		Graph<Matching> matchingGraph = MatchingGraphGenerator.generate(graph);
-		matchingGraph.printGraph();
+		matchingGraph.printGraph();*/
 	}
 
 }
