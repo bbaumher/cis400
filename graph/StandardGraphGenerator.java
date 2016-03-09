@@ -11,16 +11,21 @@ public class StandardGraphGenerator implements GraphGenerator {
 	}
 
 	@Override
-	public AdjMatrixGraph generateAdjMatrixGraph(int nodes, double p) {
+	public AdjMatrixGraph generateAdjMatrixGraph(
+    int nodes,
+    double p,
+    boolean directed)
+  {
 		AdjMatrixGraph g = new AdjMatrixGraph(nodes);
-		fillInEdges(g, p);
+		fillInEdges(g, p, directed);
 		return g;
 	}
 	
 	@Override
-	public AdjListGraph generateAdjListGraph(int nodes, double p) {
+	public AdjListGraph generateAdjListGraph(int nodes, double p, boolean directed
+  ) {
 		AdjListGraph g = new AdjListGraph(nodes);
-		fillInEdges(g, p);
+		fillInEdges(g, p, directed);
 		return g;
 	}
 	
@@ -28,12 +33,12 @@ public class StandardGraphGenerator implements GraphGenerator {
 	 *  each edge appearing with probability p.
 	 *  No self loops are allowed.
 	 */
-	private void fillInEdges (Graph<Integer> g, double p) {
+	private void fillInEdges (Graph<Integer> g, double p, boolean directed) {
 		
 		for (int i = 0; i < g.getNodeCnt(); i++) { 
 			int edgesAdded = 0;
 			
-			for (int j = 0; j < g.getNodeCnt(); j++) { // directed graphs!!
+			for (int j = directed ? 0 : i + 1; j < g.getNodeCnt(); j++) {
 				j %= g.getNodeCnt();
 				if (i == j) {
 					continue;  // no self loops, can change this
@@ -42,6 +47,9 @@ public class StandardGraphGenerator implements GraphGenerator {
 				if (d < p) {
 					try {
 						g.addEdge(i,j);
+            if (!directed) {
+              g.addEdge(j, i);
+            }
 						edgesAdded++;
 					} catch (Exception e) {
 						// TODO Auto-generated catch block

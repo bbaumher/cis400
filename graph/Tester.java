@@ -1,7 +1,6 @@
 package graph;
 
 import graph.ProbabilityDistributionAlgorithm.Method;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -45,7 +44,7 @@ public class Tester {
 		//System.out.println(testGraph);
 		//System.out.println(SCCTester.isStronglyConnected(testGraph));
 		for (int i = 1; i <= 100; i++) {
-			testGraph = gg.generateAdjListGraph(2000, 0.0010);
+			testGraph = gg.generateAdjListGraph(2000, 0.0010, true);
       ReadableNode<Integer> startNode = testGraph.getNodes().findAny().get();
 			int standardCoverTime =
 				standardRunner.getCoverTime(testGraph, startNode);
@@ -129,7 +128,7 @@ public class Tester {
 		}
 		
 		Graph<Integer> graph =
-			new StandardGraphGenerator(RANDOM).generateAdjListGraph(20, 0.2);
+			new StandardGraphGenerator(RANDOM).generateAdjListGraph(20, 0.2, true);
 		graph.printGraph();
 		ReadableGraph<Integer> largestComponent =
       getLargestStronglyConnectedComponent(graph);
@@ -249,7 +248,7 @@ public class Tester {
       getLargestStronglyConnectedComponent(
         MatchingGraphGenerator.generate(
           new StandardGraphGenerator(RANDOM)
-            .generateAdjListGraph(nodeCount, 0.03)));
+            .generateAdjListGraph(nodeCount, 0.05, false)));
 //		ReadableGraph<Integer> graph =
 //      getLargestStronglyConnectedComponent(
 //				new StandardGraphGenerator(RANDOM)
@@ -355,7 +354,7 @@ public class Tester {
         getLargestStronglyConnectedComponent(
           MatchingGraphGenerator.generate(
             new StandardGraphGenerator(RANDOM)
-              .generateAdjListGraph(nodeCount, 0.01)));
+              .generateAdjListGraph(nodeCount, 0.05, false)));
 //		ReadableGraph<Integer> graph =
 //      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
       ReadableNode<Matching> startNode = graph.getNodes().findAny().get();
