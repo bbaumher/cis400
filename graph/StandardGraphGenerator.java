@@ -33,8 +33,7 @@ public class StandardGraphGenerator implements GraphGenerator {
 		for (int i = 0; i < g.getNodeCnt(); i++) { 
 			int edgesAdded = 0;
 			
-			//ensure that every node has at least one outgoing edge by continuing to loop
-			for (int j = 0; j < g.getNodeCnt() || edgesAdded == 0; j++) { // directed graphs!!
+			for (int j = 0; j < g.getNodeCnt(); j++) { // directed graphs!!
 				j %= g.getNodeCnt();
 				if (i == j) {
 					continue;  // no self loops, can change this

@@ -18,7 +18,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		compareCoverTimes();
+		compareAlgorithms();
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -249,7 +249,7 @@ public class Tester {
       getLargestStronglyConnectedComponent(
         MatchingGraphGenerator.generate(
           new StandardGraphGenerator(RANDOM)
-            .generateAdjListGraph(nodeCount, 0.01)));
+            .generateAdjListGraph(nodeCount, 0.03)));
 //		ReadableGraph<Integer> graph =
 //      getLargestStronglyConnectedComponent(
 //				new StandardGraphGenerator(RANDOM)
@@ -274,6 +274,10 @@ public class Tester {
 						ProbabilityDistributionAlgorithm
 							.getTransitionMatrix(graph, k, calculator, Method.FORWARD_SPLIT))
         );
+        testers.add(
+					ConvergenceTester.forTransitionMatrix(
+						ProbabilityDistributionAlgorithm
+							.getTransitionMatrix(graph, k, calculator, Method.DEGREE_SPLIT)));
       };
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
 		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
@@ -283,14 +287,18 @@ public class Tester {
 		System.out.println(
 			"Log steps;"
 				+ "Standard random walk;"
-				+ "Exactly k away non;"
-        + "Exactly k away splitting;"
-				+ "Up to k away non;"
-        + "Up to k away splitting;"
-				+ "Up to k away, proportional to distance non;"
-				+ "Up to k away, proportional to distance splitting;"
-        + "Mixed (0.5) non;"
-        + "Mixed (0.5) splitting");
+				+ "Exactly k away cloning;"
+        + "Exactly k away forward splitting;"
+        + "Exactly k away degree splitting;"
+				+ "Up to k away cloning;"
+        + "Up to k away forward splitting;"
+        + "Up to k away degree splitting;"
+				+ "Up to k away, proportional to distance cloning;"
+				+ "Up to k away, proportional to distance forward splitting;"
+				+ "Up to k away, proportional to distance degree splitting;"
+        + "Mixed (0.5) cloning;"
+        + "Mixed (0.5) forward splitting;"
+        + "Mixed (0.5) degree splitting");
 		int logSteps = 0;
 		while (true) {
 			System.out.print(logSteps++);
@@ -299,7 +307,7 @@ public class Tester {
 					tester.iterateDistributions(1);
 				}
 				System.out.print(';');
-				System.out.print(tester.minNodeProbability());
+				System.out.print(tester.convergenceDistance());
 			}
 			System.out.println();
 		}
