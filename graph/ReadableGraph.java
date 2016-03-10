@@ -135,7 +135,8 @@ public abstract class ReadableGraph<T> {
 					Stream<? extends ReadableNode<T>> getAdjStream() {
 						return
 							node.getAdjStream()
-								.filter(n -> nodes.contains(n.getId()));
+								.filter(n -> nodes.contains(n.getId()))
+                .map(n -> wrapNode(n));
 					}
 				};
 			}

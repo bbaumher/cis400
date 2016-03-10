@@ -12,12 +12,13 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import matchings.Matching;
 import matchings.MatchingGraphGenerator;
+import utilities.StreamUtilities;
 
 public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		compareAlgorithms();
+		estimateDistribution();
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -258,7 +259,7 @@ public class Tester {
 //		ReadableGraph<Integer> graph =
 //      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
-		List<ConvergenceTester> testers = new ArrayList<>(4);
+		List<ConvergenceTester> testers = new ArrayList<>();
 		testers.add(
 			ConvergenceTester.forTransitionMatrix(
 				UniformDistributionAlgorithm.getTransitionMatrix(graph)));
@@ -319,7 +320,7 @@ public class Tester {
     System.out.print("k: ");
     int k = scanner.nextInt(10);
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
-		List<NodeCoverRunner> runners = new ArrayList<>(4);
+		List<NodeCoverRunner> runners = new ArrayList<>();
 		runners.add(
 			new NodeCoverRunner(
         RANDOM,
@@ -393,6 +394,70 @@ public class Tester {
 				standardRunner.getCoverTime(graph, node);
       int mixedCoverTime = mixedRunner.getCoverTime(graph, node);
 			System.out.println(i + "\t" + standardCoverTime + "\t" + mixedCoverTime);
+		}
+  }
+
+  private static void estimateDistribution() {
+    Scanner scanner = new Scanner(System.in);
+    System.out.print("Number of nodes: ");
+    int nodeCount = scanner.nextInt(10);
+    System.out.print("k: ");
+    int k = scanner.nextInt(10);
+    System.out.print("Walks: ");
+    int walks = scanner.nextInt(10);
+		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
+//		ReadableGraph<Matching> graph =
+//      getLargestStronglyConnectedComponent(
+//        MatchingGraphGenerator.generate(
+//          new StandardGraphGenerator(RANDOM)
+//            .generateAdjListGraph(nodeCount, 0.05, false)));
+		ReadableGraph<Integer> graph =
+      getLargestStronglyConnectedComponent(
+				new StandardGraphGenerator(RANDOM)
+					.generateAdjListGraph(nodeCount, 0.01, true));
+//		ReadableGraph<Integer> graph =
+//      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
+		System.out.println(graph.getNodeCnt());
+		List<DistributionEstimator> testers = new ArrayList<>(2);
+    int steps = 1024;
+		testers.add(
+			new DistributionEstimator(
+        graph,
+        steps,
+        ProbabilityDistributionAlgorithm::calculateCredits4,
+        Method.CLONING,
+        0));
+    testers.add(
+			new DistributionEstimator(
+        graph,
+        steps,
+        ProbabilityDistributionAlgorithm::calculateCredits,
+        Method.CLONING,
+        k));
+    testers.forEach(
+      estimator -> {
+        for (int walksRemaining = walks; walksRemaining > 0; walksRemaining--) {
+          estimator.performWalk();
+        }
+      }
+    );
+    ReadableNode<?> node =
+      graph.getNodes()
+        .collect(StreamUtilities.<ReadableNode<?>>randomElementCollector());
+    List<int[]> hitCountArrays =
+      testers.stream()
+        .map(estimator -> estimator.getNodeProbabilities(node))
+        .collect(Collectors.<int[]>toList());
+		
+		System.out.println("Steps;Standard random walk;Exactly k away cloning");
+		int logSteps = 0;
+		for (int step = 0; step <= steps; step++) {
+			System.out.print(step);
+			for (int[] hitCountArray : hitCountArrays) {
+				System.out.print(';');
+				System.out.print(hitCountArray[step]);
+			}
+			System.out.println();
 		}
   }
 }
