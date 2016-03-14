@@ -233,5 +233,21 @@ public class Matching implements Comparable<Matching> {
 		if (this.compareTo(m) == 0) return true;
 		else return false;
 	}
+	
+	@Override
+	public int hashCode() {
+		int hash = 37;
+		for (int i = 0; i < edgeBooleans.length; i++) {
+			int d = edgeBooleans[i] ? 3 : 7;
+			hash += d * (i+1);
+			hash *= d;
+		}
+		for (int i = 0; i < nodeBooleans.length; i++) {
+			int d = nodeBooleans[i] ? 11 : 13;
+			hash += d * (i+3);
+			hash *= d;
+		}
+		return hash;
+	}
 
 }
