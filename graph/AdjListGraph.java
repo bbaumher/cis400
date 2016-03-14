@@ -1,8 +1,10 @@
 package graph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -18,6 +20,25 @@ public class AdjListGraph extends Graph<Integer> { // undirected graph
 			nodeList.add(new AdjListNode(i));
 		}
 	}
+
+  AdjListGraph(ReadableGraph<?> graph) {
+    this(graph.getNodeCnt());
+    Map<ReadableNode<?>, Integer> nodes = new HashMap<>();
+    graph.getNodes()
+      .forEach(
+        node -> {
+          if (!nodes.containsKey(node)) {
+            nodes.put(node, nodes.size());
+          }
+        }
+      );
+    graph.getNodes()
+      .forEach(
+        node ->
+          node.getAdjStream()
+            .forEach(neighbor -> addEdge(nodes.get(node), nodes.get(neighbor)))
+      );
+  }
 
 	@Override
 	public int getNodeCnt() {

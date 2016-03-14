@@ -246,17 +246,21 @@ public class Tester {
     System.out.print("k: ");
     int k = scanner.nextInt(10);
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
+    ReadableGraph<Integer> smallGraph =
+      getLargestStronglyConnectedComponent(
+        new StandardGraphGenerator(RANDOM)
+          .generateAdjListGraph(nodeCount, 0.05, false));
+    System.out.println(smallGraph.getNodeCnt());
 		ReadableGraph<Matching> graph =
       getLargestStronglyConnectedComponent(
-        MatchingGraphGenerator.generate(
-          new StandardGraphGenerator(RANDOM)
-            .generateAdjListGraph(nodeCount, 0.05, false)));
+        MatchingGraphGenerator.generate(new AdjListGraph(smallGraph)));
 //		ReadableGraph<Integer> graph =
 //      getLargestStronglyConnectedComponent(
 //				new StandardGraphGenerator(RANDOM)
 //					.generateAdjListGraph(
 //						nodeCount,
-//						0.01));
+//						0.01,
+//            true));
 //		ReadableGraph<Integer> graph =
 //      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
@@ -339,9 +343,10 @@ public class Tester {
             tester.iterateDistributions(1);
           }
           results[step][generatorIndex] = tester.convergenceDistance();
+          System.out.print(0);
         }
       }
-
+      System.out.println();
       for (int step = 0; step < results.length; step++) {
         System.out.print(step);
         for (
