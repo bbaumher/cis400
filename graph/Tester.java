@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import matchings.Matching;
@@ -18,7 +19,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		estimateDistribution();
+		compareAlgorithms(8);
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -238,7 +239,7 @@ public class Tester {
 		print(transitionMatrix.getTransitionVectors());
 	}
 	
-	private static void compareAlgorithms() {
+	private static void compareAlgorithms(int logSteps) {
     Scanner scanner = new Scanner(System.in);
     System.out.print("Number of nodes: ");
     int nodeCount = scanner.nextInt(10);
@@ -259,30 +260,30 @@ public class Tester {
 //		ReadableGraph<Integer> graph =
 //      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
-		List<ConvergenceTester> testers = new ArrayList<>();
-		testers.add(
-			ConvergenceTester.forTransitionMatrix(
-				UniformDistributionAlgorithm.getTransitionMatrix(graph)));
-		Consumer<ProbabilityDistributionAlgorithm.CreditCalculator> addTester =
+    List<Supplier<TransitionMatrix>>
+      transitionMatrixGenerators = new ArrayList<>();
+    transitionMatrixGenerators
+      .add(() -> UniformDistributionAlgorithm.getTransitionMatrix(graph));
+		List<ConvergenceTester> testers;
+		Consumer<ProbabilityDistributionAlgorithm.CreditCalculator> addAlgorithm =
 			calculator -> {
-				testers.add(
-					ConvergenceTester.forTransitionMatrix(
+				transitionMatrixGenerators.add(
+					() ->
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, k, calculator, Method.CLONING)));
-        testers.add(
-					ConvergenceTester.forTransitionMatrix(
+              .getTransitionMatrix(graph, k, calculator, Method.CLONING));
+        transitionMatrixGenerators.add(
+					() ->
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, k, calculator, Method.FORWARD_SPLIT))
-        );
-        testers.add(
-					ConvergenceTester.forTransitionMatrix(
+							.getTransitionMatrix(graph, k, calculator, Method.FORWARD_SPLIT));
+        transitionMatrixGenerators.add(
+					() ->
 						ProbabilityDistributionAlgorithm
-							.getTransitionMatrix(graph, k, calculator, Method.DEGREE_SPLIT)));
+							.getTransitionMatrix(graph, k, calculator, Method.DEGREE_SPLIT));
       };
-		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits);
-		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
-		addTester.accept(ProbabilityDistributionAlgorithm::calculateCredits3);
-    addTester.accept(
+		addAlgorithm.accept(ProbabilityDistributionAlgorithm::calculateCredits);
+		addAlgorithm.accept(ProbabilityDistributionAlgorithm::calculateCredits2);
+		addAlgorithm.accept(ProbabilityDistributionAlgorithm::calculateCredits3);
+    addAlgorithm.accept(
       ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5));
 		System.out.println(
 			"Log steps;"
@@ -299,18 +300,61 @@ public class Tester {
         + "Mixed (0.5) cloning;"
         + "Mixed (0.5) forward splitting;"
         + "Mixed (0.5) degree splitting");
-		int logSteps = 0;
-		while (true) {
-			System.out.print(logSteps++);
-			for (ConvergenceTester tester : testers) {
-				if (logSteps > 1) {
-					tester.iterateDistributions(1);
-				}
-				System.out.print(';');
-				System.out.print(tester.convergenceDistance());
-			}
-			System.out.println();
-		}
+    if (logSteps <= 0) {
+      logSteps = 0;
+      testers =
+        transitionMatrixGenerators.stream()
+          .map(
+            transitionMatrixGenerator ->
+              ConvergenceTester
+                .forTransitionMatrix(transitionMatrixGenerator.get()))
+          .collect(Collectors.<ConvergenceTester>toList());
+      while (true) {
+        System.out.print(logSteps++);
+        for (ConvergenceTester tester : testers) {
+          if (logSteps > 1) {
+            tester.iterateDistributions(1);
+          }
+          System.out.print(';');
+          System.out.print(tester.convergenceDistance());
+        }
+        System.out.println();
+      }
+    }
+    else {
+      double[][] results = new double[logSteps + 1][];
+      for (int step = results.length - 1; step >= 0; step--) {
+        results[step] = new double[transitionMatrixGenerators.size()];
+      }
+      for (
+        int generatorIndex = transitionMatrixGenerators.size() - 1;
+        generatorIndex >= 0;
+        generatorIndex--)
+      {
+        ConvergenceTester tester =
+          ConvergenceTester.forTransitionMatrix(
+            transitionMatrixGenerators.get(generatorIndex).get());
+        for (int step = 0; step < results.length; step++) {
+          if (step > 0) {
+            tester.iterateDistributions(1);
+          }
+          results[step][generatorIndex] = tester.convergenceDistance();
+        }
+      }
+
+      for (int step = 0; step < results.length; step++) {
+        System.out.print(step);
+        for (
+          int generatorIndex = transitionMatrixGenerators.size() - 1;
+          generatorIndex >= 0;
+          generatorIndex--)
+        {
+          System.out.print(';');
+          System.out.print(results[step][generatorIndex]);
+        }
+        System.out.println();
+      }
+    }
 	}
 
   private static void compareCoverTimes() {
