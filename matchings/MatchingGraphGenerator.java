@@ -122,5 +122,36 @@ public static CustomizableGraph<Matching> generate2(Graph graph) {
 		return generate2(newGraph);
 		
 	}
+	
+	/** Takes a readable graph and returns an arbitrary matching.
+	 */
+	public static Matching getAnArbitraryMatching(
+		    graph.ReadableGraph<Integer> graph)
+		  {
+				Graph newGraph = new Graph(graph.getNodeCnt());
+				
+				Stream<? extends graph.ReadableNode<Integer>> stream = graph.getNodes();
+				Iterator<? extends graph.ReadableNode<Integer>> iter = stream.iterator();
+				while (iter.hasNext()) {
+					graph.ReadableNode<Integer> node = iter.next();
+					Set<? extends graph.ReadableNode<Integer>> neighbors =
+		        graph.getNeighbors(node);
+					int n = node.getId();
+					for (graph.ReadableNode<Integer> neighbor : neighbors) {
+						int m = neighbor.getId();
+						matchings.Node node1 = newGraph.getNodeIndexedAt(n);
+						matchings.Node node2 = newGraph.getNodeIndexedAt(m);
+						if (!node1.hasEdgeTo(node2)) {
+							newGraph.addEdgeBetweenNodes(node1, node2);
+						}
+					}
+				}
+				
+				Matching arbitraryMatching = new Matching(newGraph);
+				arbitraryMatching.fill();
+				return arbitraryMatching;
+			}
+	
+	
 
 }
