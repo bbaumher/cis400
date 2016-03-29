@@ -234,6 +234,9 @@ public class Matching implements Comparable<Matching> {
 		else return false;
 	}
 	
+	/** Two Matchings are equal if their edgeBooleans array and
+	 *  nodeBooleans array have the same size and values.
+	 */
 	@Override
 	public int hashCode() {
 		int hash = 37;
