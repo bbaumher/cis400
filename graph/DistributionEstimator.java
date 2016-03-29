@@ -14,18 +14,17 @@ import utilities.StreamUtilities;
  * number of steps, by performing multiple random walks and tallying the number
  * of hits each node gets at each time interval.
  */
-final class DistributionEstimator {
+abstract class DistributionEstimator {
   private final ReadableNode<?> startNode;
-  private final Map<ReadableNode<?>, int[]> counts = new HashMap<>();
-  private int walks;
-  private final int steps;
+  final int categories;
+  final Map<ReadableNode<?>, int[]> counts = new HashMap<>();
   private final CreditCalculator creditCalculator;
   private final Method method;
   private final int k;
 
   DistributionEstimator(
     ReadableGraph<?> readableGraph,
-    int steps,
+    int categories,
     CreditCalculator creditCalculator,
     Method method,
     int k)
@@ -33,7 +32,7 @@ final class DistributionEstimator {
     this.startNode =
       readableGraph.getNodes()
         .collect(StreamUtilities.<ReadableNode<?>>randomElementCollector());
-    this.steps = steps;
+    this.categories = categories;
     this.creditCalculator = creditCalculator;
     this.method = method;
     this.k = k;
@@ -42,14 +41,9 @@ final class DistributionEstimator {
   /**
    * Perform a random walk and add the visited nodes to the running counts.
    */
-  void performWalk() {
+  void performWalk(int steps) {
     ReadableNode<?> currentNode = startNode;
-    int[] stepsArray = counts.get(startNode);
-    if (stepsArray == null) {
-      stepsArray = new int[steps + 1];
-      counts.put(startNode, stepsArray);
-    }
-    stepsArray[0]++;
+    recordNodeVisit(currentNode, 0);
     for (int step = 1; step <= steps; step++) {
       Map<ReadableNode<?>, Double> probabilities =
         ProbabilityDistributionAlgorithm
@@ -62,14 +56,8 @@ final class DistributionEstimator {
           break;
         }
       }
-      stepsArray = counts.get(currentNode);
-      if (stepsArray == null) {
-        stepsArray = new int[steps + 1];
-        counts.put(currentNode, stepsArray);
-      }
-      stepsArray[step]++;
+      recordNodeVisit(currentNode, step);
     }
-    walks++;
   }
 
   /**
@@ -80,7 +68,9 @@ final class DistributionEstimator {
     int[] result = counts.get(readableNode);
     return
       result == null
-        ? new int[steps + 1]
+        ? new int[categories]
         : Arrays.copyOf(result, result.length);
   }
+
+  abstract void recordNodeVisit(ReadableNode<?> node, int step);
 }

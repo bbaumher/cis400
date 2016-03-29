@@ -19,7 +19,7 @@ public class Tester {
 	private static final Random RANDOM = new Random();
 	
 	public static void main(String[] args) {
-		compareAlgorithms(8);
+		compareAlgorithms(10);
 	}
 	
 	/** Run the algorithm on a test graph.
@@ -452,8 +452,8 @@ public class Tester {
     int nodeCount = scanner.nextInt(10);
     System.out.print("k: ");
     int k = scanner.nextInt(10);
-    System.out.print("Walks: ");
-    int walks = scanner.nextInt(10);
+    System.out.print("Full walks: ");
+    int fullWalks = scanner.nextInt(10);
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
 //		ReadableGraph<Matching> graph =
 //      getLargestStronglyConnectedComponent(
@@ -467,29 +467,23 @@ public class Tester {
 //		ReadableGraph<Integer> graph =
 //      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
-		List<DistributionEstimator> testers = new ArrayList<>(2);
-    int steps = 1024;
+		List<CoarseDistributionEstimator> testers = new ArrayList<>(2);
+    int steps = 10;
 		testers.add(
-			new DistributionEstimator(
+			new CoarseDistributionEstimator(
         graph,
         steps,
         ProbabilityDistributionAlgorithm::calculateCredits4,
         Method.CLONING,
         0));
     testers.add(
-			new DistributionEstimator(
+			new CoarseDistributionEstimator(
         graph,
         steps,
         ProbabilityDistributionAlgorithm::calculateCredits,
         Method.CLONING,
         k));
-    testers.forEach(
-      estimator -> {
-        for (int walksRemaining = walks; walksRemaining > 0; walksRemaining--) {
-          estimator.performWalk();
-        }
-      }
-    );
+    testers.forEach(estimator -> estimator.performWalks(fullWalks));
     ReadableNode<?> node =
       graph.getNodes()
         .collect(StreamUtilities.<ReadableNode<?>>randomElementCollector());
@@ -498,7 +492,7 @@ public class Tester {
         .map(estimator -> estimator.getNodeProbabilities(node))
         .collect(Collectors.<int[]>toList());
 		
-		System.out.println("Steps;Standard random walk;Exactly k away cloning");
+		System.out.println("Log steps;Standard random walk;Exactly k away cloning");
 		int logSteps = 0;
 		for (int step = 0; step <= steps; step++) {
 			System.out.print(step);
