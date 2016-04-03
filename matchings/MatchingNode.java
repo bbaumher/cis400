@@ -21,5 +21,10 @@ public class MatchingNode extends Node {
 	public int compareTo(MatchingNode o) {
 		return this.myMatching.compareTo(o.myMatching);
 	}
+	
+	@Override
+	public int hashCode() {
+		return myMatching.hashCode();
+	}
 
 }
