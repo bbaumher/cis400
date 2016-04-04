@@ -18,8 +18,11 @@ final class RegularGraphGenerator {
    * The algorithm runs in expected time O(nd^2) (assuming the above bound
    * on d).
    *
-   * This algorithm is from <i>Generating random regular graphs quickly</i>, by
-   * A. Steger and N. C. Wormald (1999).
+   * This algorithm is a simplification of the one presented in <i>Generating
+   * random regular graphs quickly</i>, by A. Steger and N. C. Wormald (1999).
+   * The modification is that we perform phase 2 using the algorithm for
+   * phase 1, since this doesn't increase the asymptotic space or time
+   * requirements of the algorithm.
    */
   ReadableGraph<Integer> generateRegularGraph(int nodeCount, int degree) {
     if (nodeCount <= degree || (1 & nodeCount & degree) != 0) {
@@ -30,12 +33,13 @@ final class RegularGraphGenerator {
       Graph<Integer> graph = new AdjListGraph(nodeCount);
 
       IntSet points = new IntSet(nodeCount * degree, true);
+      IntSet remainingVertices = new IntSet(nodeCount, true);
       int[] vertexCounts = new int[nodeCount];
       Arrays.fill(vertexCounts, degree);
 
-      // Phase 1
-      int phaseThreshold = degree * degree << 1;
-      while (points.getSize() >= phaseThreshold) {
+      // Phases 1 and 2
+      int phaseThreshold = degree << 1;
+      while (remainingVertices.getSize() >= phaseThreshold) {
         int point1 = points.getValue(random.nextInt(points.getSize()));
         int point2;
         do {
@@ -48,55 +52,24 @@ final class RegularGraphGenerator {
           points.removeValue(point2);
           graph.addEdge(vertex1, vertex2);
           graph.addEdge(vertex2, vertex1);
-          vertexCounts[vertex1]--;
-          vertexCounts[vertex2]--;
-        }
-      }
-
-      // Phase 2
-      IntSet eligibleVertices = new IntSet(nodeCount, false);
-      IntStream.range(0, nodeCount)
-        .filter(vertex -> vertexCounts[vertex] > 0)
-        .forEach(eligibleVertices::addValue);
-      phaseThreshold = degree << 1;
-      while (eligibleVertices.getSize() >= phaseThreshold) {
-        int vertex1 =
-          eligibleVertices.getValue(random.nextInt(eligibleVertices.getSize()));
-        int vertex2;
-        do {
-          vertex2 =
-            eligibleVertices
-              .getValue(random.nextInt(eligibleVertices.getSize()));
-        } while (vertex1 == vertex2);
-        int point1 = vertex1 * degree + random.nextInt(degree);
-        int point2 = vertex2 * degree + random.nextInt(degree);
-        if (
-          points.contains(point1)
-            && points.contains(point2)
-            && isSuitablePair(points, degree, vertex1, vertex2))
-        {
-          points.addValue(point1);
-          points.addValue(point2);
           if (vertexCounts[vertex1]-- <= 1) {
-            eligibleVertices.removeValue(vertex1);
+            remainingVertices.removeValue(vertex1);
           }
           if (vertexCounts[vertex2]-- <= 1) {
-            eligibleVertices.removeValue(vertex2);
+            remainingVertices.removeValue(vertex2);
           }
-          graph.addEdge(vertex1, vertex2);
-          graph.addEdge(vertex2, vertex1);
         }
       }
 
       // Phase 3
       IntSet eligibleEdges =
         new IntSet(
-          eligibleVertices.getSize() * eligibleVertices.getSize(),
+          remainingVertices.getSize() * remainingVertices.getSize(),
           true);
       for (
         int edge = eligibleEdges.getCapacity() - 1;
         edge >= 0;
-        edge -= eligibleVertices.getSize() + 1)
+        edge -= remainingVertices.getSize() + 1)
       {
         eligibleEdges.removeValue(edge);
       }
@@ -108,27 +81,27 @@ final class RegularGraphGenerator {
         int vertex1 = points.getValue(index) / degree;
         int vertex2 = points.getValue(index + 1) / degree;
         if (
-          eligibleVertices.contains(vertex1)
-            && eligibleVertices.contains(vertex2))
+          remainingVertices.contains(vertex1)
+            && remainingVertices.contains(vertex2))
         {
           eligibleEdges
-            .removeValue(
-              eligibleVertices.getIndex(vertex1) * degree
-                + eligibleVertices.getIndex(vertex2));
+            .removeValue(remainingVertices.getIndex(vertex1) * degree
+                + remainingVertices.getIndex(vertex2));
           eligibleEdges
-            .removeValue(
-              eligibleVertices.getIndex(vertex2) * degree
-                + eligibleVertices.getIndex(vertex1));
+            .removeValue(remainingVertices.getIndex(vertex2) * degree
+                + remainingVertices.getIndex(vertex1));
         }
       }
+
+      IntSet incompleteVertices = new IntSet(remainingVertices.getSize(), true);
 
       while (eligibleEdges.getSize() > 0) {
         int edge =
           eligibleEdges.getValue(random.nextInt(eligibleEdges.getSize()));
-        int reducedVertex1 = edge / eligibleVertices.getSize();
-        int reducedVertex2 = edge % eligibleVertices.getSize();
-        int fullVertex1 = eligibleVertices.getValue(reducedVertex1);
-        int fullVertex2 = eligibleVertices.getValue(reducedVertex2);
+        int reducedVertex1 = edge / remainingVertices.getSize();
+        int reducedVertex2 = edge % remainingVertices.getSize();
+        int fullVertex1 = remainingVertices.getValue(reducedVertex1);
+        int fullVertex2 = remainingVertices.getValue(reducedVertex2);
         if (
           random.nextInt(eligibleEdges.getCapacity())
             < vertexCounts[fullVertex1] * vertexCounts[fullVertex2])
@@ -136,23 +109,26 @@ final class RegularGraphGenerator {
           eligibleEdges.removeValue(edge);
           eligibleEdges
             .removeValue(
-              reducedVertex2 * eligibleVertices.getSize() + reducedVertex1);
+              reducedVertex2 * remainingVertices.getSize() + reducedVertex1);
           graph.addEdge(fullVertex1, fullVertex2);
           graph.addEdge(fullVertex2, fullVertex1);
           IntBiConsumer updateVertex =
             (reducedVertex, fullVertex) -> {
               if (vertexCounts[fullVertex]-- <= 1) {
+                incompleteVertices.removeValue(reducedVertex);
                 for (
-                  int otherVertex = eligibleVertices.getSize() - 1;
+                  int otherVertex = remainingVertices.getSize() - 1;
                   otherVertex >= 0;
                   otherVertex--)
                 {
                   eligibleEdges
                     .removeValue(
-                      reducedVertex * eligibleVertices.getSize() + otherVertex);
+                      reducedVertex * remainingVertices.getSize()
+                        + otherVertex);
                   eligibleEdges
                     .removeValue(
-                      otherVertex * eligibleVertices.getSize() + reducedVertex);
+                      otherVertex * remainingVertices.getSize()
+                        + reducedVertex);
                 }
               }
             };
@@ -161,7 +137,7 @@ final class RegularGraphGenerator {
         }
       }
 
-      if (Arrays.stream(vertexCounts).allMatch(i -> i <= 0)) {
+      if (incompleteVertices.getSize() <= 0) {
         return graph;
       }
     }
