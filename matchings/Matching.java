@@ -34,6 +34,10 @@ public class Matching implements Comparable<Matching> {
 		}
 	}
 	
+	public void fillSmartly() {
+		BlossomAlgorithm.runAlgorithm(this);
+	}
+	
 	public ArrayList<Matching> getNeighborMatchings() {
 		boolean isPerfect = true; //whether all nodes are covered
 		for (boolean bool : nodeBooleans) {
@@ -66,7 +70,7 @@ public class Matching implements Comparable<Matching> {
 	
 	//removes the specified edge removed
 	//also, the nodes belonging to that edge are removed
-	private Matching removeEdge(Edge edge) {
+	protected Matching removeEdge(Edge edge) {
 		int edgeIndex = myGraph.getIndexOfEdge(edge);
 		int node1Index = myGraph.getIndexOfNode(edge.getNode1());
 		int node2Index = myGraph.getIndexOfNode(edge.getNode2());
@@ -80,7 +84,7 @@ public class Matching implements Comparable<Matching> {
 	
 	//removes the specified node
 	//also, the edge (if any) belonging to that node is removed
-	private Matching removeNode(Node node) {
+	protected Matching removeNode(Node node) {
 		Edge edge = getEdgeIncidentToNode(node);
 		if (edge != null) removeEdge(edge);
 		
@@ -89,7 +93,7 @@ public class Matching implements Comparable<Matching> {
 	
 	//adds the specified edge to this matching
 	//also, the nodes belonging to that edge are disconnected from any other edges
-	private Matching addEdge(Edge edge) {
+	protected Matching addEdge(Edge edge) {
 		int edgeIndex = myGraph.getIndexOfEdge(edge);
 		Node node1 = edge.getNode1();
 		int node1Index = myGraph.getIndexOfNode(node1);
@@ -106,7 +110,7 @@ public class Matching implements Comparable<Matching> {
 	}
 	
 	//gets the edge of this matching incident to the specified node
-	private Edge getEdgeIncidentToNode(Node node) {
+	protected Edge getEdgeIncidentToNode(Node node) {
 		for(Edge edge : node.getEdgeList()) {
 			if (hasEdge(edge)) return edge;
 		}
@@ -190,13 +194,13 @@ public class Matching implements Comparable<Matching> {
 		return buf.toString();
 	}
 	
-	private boolean hasEdge(Edge edge) {
+	protected boolean hasEdge(Edge edge) {
 		int index = myGraph.getIndexOfEdge(edge);
 		boolean bool = edgeBooleans[index];
 		return bool;
 	}
 	
-	private boolean hasNode(Node node) {
+	protected boolean hasNode(Node node) {
 		int index = myGraph.getIndexOfNode(node);
 		boolean bool = nodeBooleans[index];
 		return bool;
