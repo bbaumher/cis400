@@ -200,10 +200,30 @@ public class Matching implements Comparable<Matching> {
 		return bool;
 	}
 	
+	protected boolean hasEdge(int index) {
+		boolean bool = edgeBooleans[index];
+		return bool;
+	}
+	
 	protected boolean hasNode(Node node) {
 		int index = myGraph.getIndexOfNode(node);
 		boolean bool = nodeBooleans[index];
 		return bool;
+	}
+	
+	protected boolean hasNode(int index) {
+		boolean bool = nodeBooleans[index];
+		return bool;
+	}
+	
+	/** Returns whether the inputted node is exposed,
+	 *  i.e. there are node edges incident to it.
+	 */
+	protected boolean isExposed(Node node) {
+		for (Edge edge : node.getEdgeList()) {
+			if (this.hasEdge(edge)) return false;
+		}
+		return true;
 	}
 
 	@Override
