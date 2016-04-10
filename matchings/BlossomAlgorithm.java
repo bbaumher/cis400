@@ -1,6 +1,8 @@
 package matchings;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class BlossomAlgorithm {
 
@@ -39,8 +41,30 @@ public class BlossomAlgorithm {
 	 *  if no possible path can be found.
 	 */
 	protected static ArrayList<Edge> findAugPath(Matching matching) {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Edge> output = new ArrayList<Edge>();
+		Graph graph = matching.myGraph;
+		ArrayList<Node> nodeList = graph.getNodeList();
+		ArrayList<Edge> edgeList = graph.getEdgeList();
+		Forest forest = new Forest();
+		
+		Map<Node,Boolean> markedNodes = new TreeMap<Node,Boolean>();
+		Map<Edge,Boolean> markedEdges = new TreeMap<Edge,Boolean>();
+
+		for (Node node : nodeList) {
+			markedNodes.put(node, false);
+		}
+		
+		for (Edge edge : edgeList) {
+			markedEdges.put(edge, matching.hasEdge(edge));
+		}
+		
+		for (Node node : nodeList) {
+			if(matching.isExposed(node)) {
+				forest.addNewTree(node);
+			}
+		}
+				
+		return output;
 	}
 
 }
