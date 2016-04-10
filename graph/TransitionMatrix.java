@@ -2,6 +2,7 @@ package graph;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
@@ -13,22 +14,20 @@ import java.util.stream.Stream;
 /**
  * A class representing a transition matrix in a Markov chain.
  */
-class TransitionMatrix {
+class TransitionMatrix<T> {
   /**
    * Each {@code double[]} is a vector representing the probabilities of leaving
    * a certain vertex to each of the other vertices.
    */
   private final double[][] transitionVectors;
+  private final List<ReadableNode<T>> orderedNodes;
 
-  private TransitionMatrix(double[][] transitionVectors) {
+  private TransitionMatrix(
+    double[][] transitionVectors,
+    List<ReadableNode<T>> orderedNodes)
+  {
     this.transitionVectors = transitionVectors;
-  }
-
-  /**
-   * Construct a {@link TransitionMatrix} using a copy of the given data.
-   */
-  static TransitionMatrix fromTransitionVectors(double[][] transitionVectors) {
-    return new TransitionMatrix(copy(transitionVectors));
+    this.orderedNodes = orderedNodes;
   }
   
   /**
@@ -47,7 +46,7 @@ class TransitionMatrix {
    * @return The {@link TransitionMatrix} constructed for the provided
    * parameters.
    */
-  static <T> TransitionMatrix fromProbabilityRetriever(
+  static <T> TransitionMatrix<T> fromProbabilityRetriever(
     Stream<? extends ReadableNode<T>> nodes,
     Function<ReadableNode<T>, ToDoubleFunction<ReadableNode<T>>>
       probabilityRetriever)
@@ -58,13 +57,14 @@ class TransitionMatrix {
           (node1, node2) ->
             Integer.compare(node1.getId().hashCode(), node2.getId().hashCode()))
         .collect(Collectors.<ReadableNode<T>>toList());
-	return
-      new TransitionMatrix(
+    return
+      new TransitionMatrix<>(
         orderedNodes.stream()
-		  .map(probabilityRetriever)
+          .map(probabilityRetriever)
           .map(
             function -> orderedNodes.stream().mapToDouble(function).toArray())
-          .toArray(double[][]::new));
+          .toArray(double[][]::new),
+        orderedNodes);
   }
   
   /**
@@ -78,7 +78,7 @@ class TransitionMatrix {
    * {@code transitionMaps.get(i).get(j)} should return the probability of going
    * to {@link Node} {@code j} after being at {@link Node} {@code i}.
    */
-  static <T> TransitionMatrix fromTransitionMaps(
+  static <T> TransitionMatrix<T> fromTransitionMaps(
     Map<ReadableNode<T>, Map<ReadableNode<T>, Double>> transitionMaps)
   {
     return
@@ -112,11 +112,11 @@ class TransitionMatrix {
    * Return the matrix product of this matrix with itself. Also, normalize each
    * row to prevent small rounding errors to propagate too far.
    */
-  TransitionMatrix square() {
+  TransitionMatrix<T> square() {
     return
-      new TransitionMatrix(
+      new TransitionMatrix<>(
         Arrays.stream(transitionVectors)
-		  .parallel()
+          .parallel()
           .map(
             vector -> {
               double[] result =
@@ -132,10 +132,11 @@ class TransitionMatrix {
                         .sum())
                   .toArray();
               ProbabilityDistributionAlgorithm.normalize(result);
-			  return result;
+              return result;
             }
-		  )
-          .toArray(double[][]::new));
+          )
+          .toArray(double[][]::new),
+        orderedNodes);
   }
   
   /**
@@ -182,5 +183,15 @@ class TransitionMatrix {
             Arrays.stream(vector).min().orElse(Double.POSITIVE_INFINITY))
         .min()
         .orElse(Double.POSITIVE_INFINITY);
+  }
+
+  void processEntries(
+    int row,
+    BiConsumer<ReadableNode<T>, Double> entryConsumer)
+  {
+    double[] rowEntries = transitionVectors[row];
+    for (int column = 0; column < orderedNodes.size(); column++) {
+      entryConsumer.accept(orderedNodes.get(column), rowEntries[column]);
+    }
   }
 }

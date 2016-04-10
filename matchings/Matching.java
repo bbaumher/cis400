@@ -1,5 +1,6 @@
 package matchings;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Matching implements Comparable<Matching> {
 	
@@ -39,14 +40,9 @@ public class Matching implements Comparable<Matching> {
 	}
 	
 	public ArrayList<Matching> getNeighborMatchings() {
-		boolean isPerfect = true; //whether all nodes are covered
-		for (boolean bool : nodeBooleans) {
-			if (!bool) isPerfect = false;
-		}
-		
 		ArrayList<Matching> output = new ArrayList<Matching>();
 		
-		if (isPerfect) { //is perfect
+		if (isPerfect()) { //is perfect
 			for (int i = 0; i < edgeBooleans.length; i++) {
 				if (edgeBooleans[i]) { //edge is present
 					Edge edge = myGraph.getEdgeIndexedAt(i);
@@ -67,6 +63,16 @@ public class Matching implements Comparable<Matching> {
 		
 		return output;
 	}
+
+  public boolean isPerfect() {
+		for (boolean bool : nodeBooleans) {
+			if (!bool) {
+        return false;
+      }
+		}
+    
+    return true;
+  }
 	
 	//removes the specified edge removed
 	//also, the nodes belonging to that edge are removed

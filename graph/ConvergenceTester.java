@@ -3,29 +3,21 @@ package graph;
  * A class for testing how quickly a Markov chain converges to a stationary
  * distribution.
  */
-final class ConvergenceTester {
-	private TransitionMatrix transitionMatrix;
+final class ConvergenceTester<T> {
+	private TransitionMatrix<T> transitionMatrix;
 	private int iterations = 0;
 	
-	private ConvergenceTester(TransitionMatrix transitionMatrix) {
+	private ConvergenceTester(TransitionMatrix<T> transitionMatrix) {
 		this.transitionMatrix = transitionMatrix;
 	}
 	
-	static ConvergenceTester forTransitionMatrix(
-		TransitionMatrix transitionMatrix)
+	static <T> ConvergenceTester<T> forTransitionMatrix(
+		TransitionMatrix<T> transitionMatrix)
 	{
-		return new ConvergenceTester(transitionMatrix);
+		return new ConvergenceTester<>(transitionMatrix);
 	}
 	
-	static ConvergenceTester forTransitionMatrix(
-		double[][] transitionVectors)
-	{
-		return
-			new ConvergenceTester(
-				TransitionMatrix.fromTransitionVectors(transitionVectors));
-	}
-	
-	TransitionMatrix getTransitionMatrix() {
+	TransitionMatrix<T> getTransitionMatrix() {
 		return transitionMatrix;
 	}
 	

@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,7 @@ public class ProbabilityDistributionAlgorithm {
 	 * of them at full value).
 	 * @return 
 	 */
-	public static Map<ReadableNode<?>, Double> getNeighborVector(
+	static Map<ReadableNode<?>, Double> getNeighborVector(
 			ReadableNode<?> s,
 			int k,
 			CreditCalculator creditCalculator,

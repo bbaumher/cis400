@@ -3,6 +3,7 @@ package graph;
 import graph.ProbabilityDistributionAlgorithm.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -138,7 +139,7 @@ public class Tester {
 		largestComponent.printGraph();
 		
 		//run the algorithm
-		TransitionMatrix transitionMatrix =
+		TransitionMatrix<Integer> transitionMatrix =
 			ProbabilityDistributionAlgorithm
 				.getTransitionMatrix(
 					largestComponent,
@@ -153,7 +154,7 @@ public class Tester {
 			ConvergenceTester.forTransitionMatrix(transitionMatrix)
 				.logStepsForConvergence(0.125));
 		
-		ConvergenceTester convergenceTester =
+		ConvergenceTester<Integer> convergenceTester =
 			ConvergenceTester.forTransitionMatrix(transitionMatrix);
 			
 		int iteration = 1;
@@ -214,7 +215,7 @@ public class Tester {
 		graph.addEdge(1, 2);
 		graph.addEdge(2, 3);
 		graph.addEdge(3, 0);
-		TransitionMatrix transitionMatrix =
+		TransitionMatrix<Integer> transitionMatrix =
 			ProbabilityDistributionAlgorithm
 				.getTransitionMatrix(
 					graph,
@@ -229,7 +230,7 @@ public class Tester {
 		int k = 2;
 		ReadableGraph<Integer> graph =
       LollipopGraphGenerator.generateAdjListGraph(nodeCount);
-		TransitionMatrix transitionMatrix =
+		TransitionMatrix<Integer> transitionMatrix =
 			ProbabilityDistributionAlgorithm
 				.getTransitionMatrix(
 					graph,
@@ -243,17 +244,21 @@ public class Tester {
     Scanner scanner = new Scanner(System.in);
     System.out.print("Number of nodes: ");
     int nodeCount = scanner.nextInt(10);
+    System.out.print("Node degree: ");
+    int degree = scanner.nextInt(10);
     System.out.print("k: ");
     int k = scanner.nextInt(10);
 		int logSize = 32 - Integer.numberOfLeadingZeros(nodeCount);
     ReadableGraph<Integer> smallGraph =
-      getLargestStronglyConnectedComponent(
-        new StandardGraphGenerator(RANDOM)
-          .generateAdjListGraph(nodeCount, 0.05, false));
+      new AdjListGraph(
+        getLargestStronglyConnectedComponent(
+          new RegularGraphGenerator(RANDOM)
+            .generateRegularGraph(nodeCount, degree)));
+    smallGraph.printGraph();
     System.out.println(smallGraph.getNodeCnt());
 		ReadableGraph<Matching> graph =
       getLargestStronglyConnectedComponent(
-        MatchingGraphGenerator.generate(new AdjListGraph(smallGraph)));
+        MatchingGraphGenerator.generate(smallGraph));
 //		ReadableGraph<Integer> graph =
 //      getLargestStronglyConnectedComponent(
 //				new StandardGraphGenerator(RANDOM)
@@ -264,11 +269,21 @@ public class Tester {
 //		ReadableGraph<Integer> graph =
 //      LollipopGraphGenerator.generateAdjListGraph(nodeCount);
 		System.out.println(graph.getNodeCnt());
-    List<Supplier<TransitionMatrix>>
+    System.out
+      .println(
+        graph.getNodes().filter(node -> node.getId().isPerfect()).count()
+          + " perfect matchings");
+    System.out.println(
+      graph.getNodes()
+        .collect(
+          StreamUtilities.<ReadableNode<Matching>>randomElementCollector())
+        .getId()
+        .toString());
+    List<Supplier<TransitionMatrix<Matching>>>
       transitionMatrixGenerators = new ArrayList<>();
     transitionMatrixGenerators
       .add(() -> UniformDistributionAlgorithm.getTransitionMatrix(graph));
-		List<ConvergenceTester> testers;
+		List<ConvergenceTester<Matching>> testers;
 		Consumer<ProbabilityDistributionAlgorithm.CreditCalculator> addAlgorithm =
 			calculator -> {
 				transitionMatrixGenerators.add(
@@ -289,22 +304,27 @@ public class Tester {
 		addAlgorithm.accept(ProbabilityDistributionAlgorithm::calculateCredits3);
     addAlgorithm.accept(
       ProbabilityDistributionAlgorithm.getSimpleMixedCalculator(0.5));
-		System.out.println(
-			"Log steps;"
-				+ "Standard random walk;"
-				+ "Exactly k away cloning;"
-        + "Exactly k away forward splitting;"
-        + "Exactly k away degree splitting;"
-				+ "Up to k away cloning;"
-        + "Up to k away forward splitting;"
-        + "Up to k away degree splitting;"
-				+ "Up to k away, proportional to distance cloning;"
-				+ "Up to k away, proportional to distance forward splitting;"
-				+ "Up to k away, proportional to distance degree splitting;"
-        + "Mixed (0.5) cloning;"
-        + "Mixed (0.5) forward splitting;"
-        + "Mixed (0.5) degree splitting");
+    String[] algorithmNames =
+      {
+        "Standard random walk",
+				"Exactly k away cloning",
+        "Exactly k away forward splitting",
+        "Exactly k away degree splitting",
+				"Up to k away cloning",
+        "Up to k away forward splitting",
+        "Up to k away degree splitting",
+				"Up to k away, proportional to distance cloning",
+				"Up to k away, proportional to distance forward splitting",
+				"Up to k away, proportional to distance degree splitting",
+        "Mixed (0.5) cloning",
+        "Mixed (0.5) forward splitting",
+        "Mixed (0.5) degree splitting"
+      };
     if (logSteps <= 0) {
+      System.out.print("Log steps");
+      Arrays.stream(algorithmNames)
+        .forEachOrdered(name -> System.out.print(';' + name));
+      System.out.println();
       logSteps = 0;
       testers =
         transitionMatrixGenerators.stream()
@@ -312,10 +332,10 @@ public class Tester {
             transitionMatrixGenerator ->
               ConvergenceTester
                 .forTransitionMatrix(transitionMatrixGenerator.get()))
-          .collect(Collectors.<ConvergenceTester>toList());
+          .collect(Collectors.<ConvergenceTester<Matching>>toList());
       while (true) {
         System.out.print(logSteps++);
-        for (ConvergenceTester tester : testers) {
+        for (ConvergenceTester<Matching> tester : testers) {
           if (logSteps > 1) {
             tester.iterateDistributions(1);
           }
@@ -335,7 +355,7 @@ public class Tester {
         generatorIndex >= 0;
         generatorIndex--)
       {
-        ConvergenceTester tester =
+        ConvergenceTester<Matching> tester =
           ConvergenceTester.forTransitionMatrix(
             transitionMatrixGenerators.get(generatorIndex).get());
         for (int step = 0; step < results.length; step++) {
@@ -345,7 +365,30 @@ public class Tester {
           results[step][generatorIndex] = tester.convergenceDistance();
           System.out.print(0);
         }
+        Collection<Double> perfectMatchingDistribution = new ArrayList<>();
+        Collection<Double> nearPerfectMatchingDistribution = new ArrayList<>();
+        tester.getTransitionMatrix()
+          .processEntries(
+            0,
+            (node, probability) ->
+              (node.getId().isPerfect()
+                ? perfectMatchingDistribution
+                : nearPerfectMatchingDistribution
+              ).add(probability)
+          );
+        System.out.println("\n" + algorithmNames[generatorIndex]);
+        System.out.println("Perfect matchings");
+        perfectMatchingDistribution.stream()
+          .sorted()
+          .forEachOrdered(System.out::println);
+        System.out.println("Near-perfect matchings");
+        nearPerfectMatchingDistribution.stream()
+          .sorted()
+          .forEachOrdered(System.out::println);
       }
+      System.out.print("Log steps");
+      Arrays.stream(algorithmNames)
+        .forEachOrdered(name -> System.out.print(';' + name));
       System.out.println();
       for (int step = 0; step < results.length; step++) {
         System.out.print(step);
