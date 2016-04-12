@@ -1,4 +1,7 @@
 package graph;
+
+import java.util.function.Predicate;
+
 /**
  * A class for testing how quickly a Markov chain converges to a stationary
  * distribution.
@@ -25,12 +28,12 @@ final class ConvergenceTester<T> {
 	 * Repeatedly square the matrix, and print the diameter of convergence for
 	 * each iteration.
 	 */
-	void printInfiniteIteration() {
+	void printInfiniteIteration(Predicate<ReadableNode<T>> nodesToInclude) {
 		while (true) {
 			System.out.print("2^");
 			System.out.print(iterations);
 			System.out.print(" steps; distance ");
-			System.out.println(convergenceDistance());
+			System.out.println(convergenceDistance(nodesToInclude));
 			iterateDistributions(1);
 		}
 	}
@@ -53,8 +56,8 @@ final class ConvergenceTester<T> {
 	 * 
 	 * @return The max range of any coordinate of the distribution vector.
 	 */
-	double convergenceDistance() {
-		return transitionMatrix.distributionRange();
+	double convergenceDistance(Predicate<ReadableNode<T>> nodesToInclude) {
+		return transitionMatrix.distributionRange(nodesToInclude);
 	}
 
   /**
@@ -75,9 +78,14 @@ final class ConvergenceTester<T> {
 	 * @return The log_2 of the number of steps we need to run the Markov chain
 	 * to get within the specified error.
 	 */
-	int logStepsForConvergence(double convergenceDistance) {
+	int logStepsForConvergence(
+    Predicate<ReadableNode<T>> nodesToInclude,
+    double convergenceDistance)
+  {
 		int result = 0;
-		while (transitionMatrix.distributionRange() > convergenceDistance) {
+		while (
+      transitionMatrix.distributionRange(nodesToInclude) > convergenceDistance)
+    {
 			transitionMatrix = transitionMatrix.square();
 			result++;
 		}

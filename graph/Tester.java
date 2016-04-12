@@ -152,7 +152,7 @@ public class Tester {
 		
 		System.out.println(
 			ConvergenceTester.forTransitionMatrix(transitionMatrix)
-				.logStepsForConvergence(0.125));
+				.logStepsForConvergence(node -> true, 0.125));
 		
 		ConvergenceTester<Integer> convergenceTester =
 			ConvergenceTester.forTransitionMatrix(transitionMatrix);
@@ -163,7 +163,7 @@ public class Tester {
 			System.out.print("2^");
 			System.out.print(iteration++);
 			System.out.print(" iterations; distance ");
-			System.out.println(convergenceTester.convergenceDistance());
+			System.out.println(convergenceTester.convergenceDistance(node -> true));
 			print(convergenceTester.getTransitionMatrix().getTransitionVectors()
 			);
 		}
@@ -256,9 +256,17 @@ public class Tester {
             .generateRegularGraph(nodeCount, degree)));
     smallGraph.printGraph();
     System.out.println(smallGraph.getNodeCnt());
+    ReadableGraph<Matching> rawMatchingGraph =
+      MatchingGraphGenerator.generate(smallGraph);
 		ReadableGraph<Matching> graph =
-      getLargestStronglyConnectedComponent(
-        MatchingGraphGenerator.generate(smallGraph));
+      ReadableGraph.getSubGraph(
+        rawMatchingGraph,
+        rawMatchingGraph.getNodes()
+          .map(ReadableNode<Matching>::getId)
+          .filter(
+            matching ->
+              matching.matchedVertexCount() >= smallGraph.getNodeCnt() - 2)
+          .collect(Collectors.<Matching>toSet()));
 //		ReadableGraph<Integer> graph =
 //      getLargestStronglyConnectedComponent(
 //				new StandardGraphGenerator(RANDOM)
@@ -340,16 +348,21 @@ public class Tester {
             tester.iterateDistributions(1);
           }
           System.out.print(';');
-          System.out.print(tester.convergenceDistance());
+          System.out.print(
+            tester.convergenceDistance(node -> node.getId().isPerfect()));
         }
         System.out.println();
       }
     }
     else {
-      double[][] results = new double[logSteps + 1][];
-      for (int step = results.length - 1; step >= 0; step--) {
-        results[step] = new double[transitionMatrixGenerators.size()];
+      double[][] uniformDeviation = new double[logSteps + 1][];
+      for (int step = uniformDeviation.length - 1; step >= 0; step--) {
+        uniformDeviation[step] = new double[transitionMatrixGenerators.size()];
       }
+      double[] perfectMatchingProbability =
+        new double[transitionMatrixGenerators.size()];
+      double[] distributionRange =
+        new double[transitionMatrixGenerators.size()];
       for (
         int generatorIndex = transitionMatrixGenerators.size() - 1;
         generatorIndex >= 0;
@@ -358,50 +371,75 @@ public class Tester {
         ConvergenceTester<Matching> tester =
           ConvergenceTester.forTransitionMatrix(
             transitionMatrixGenerators.get(generatorIndex).get());
-        for (int step = 0; step < results.length; step++) {
+        for (int step = 0; step < uniformDeviation.length; step++) {
           if (step > 0) {
             tester.iterateDistributions(1);
           }
-          results[step][generatorIndex] = tester.convergenceDistance();
+          uniformDeviation[step][generatorIndex] =
+            tester.convergenceDistance(node -> node.getId().isPerfect());
           System.out.print(0);
         }
         Collection<Double> perfectMatchingDistribution = new ArrayList<>();
-        Collection<Double> nearPerfectMatchingDistribution = new ArrayList<>();
         tester.getTransitionMatrix()
           .processEntries(
             0,
-            (node, probability) ->
-              (node.getId().isPerfect()
-                ? perfectMatchingDistribution
-                : nearPerfectMatchingDistribution
-              ).add(probability)
+            (node, probability) -> {
+              if (node.getId().isPerfect()) {
+                perfectMatchingDistribution.add(probability);
+              }
+            }
           );
-        System.out.println("\n" + algorithmNames[generatorIndex]);
-        System.out.println("Perfect matchings");
-        perfectMatchingDistribution.stream()
-          .sorted()
-          .forEachOrdered(System.out::println);
-        System.out.println("Near-perfect matchings");
-        nearPerfectMatchingDistribution.stream()
-          .sorted()
-          .forEachOrdered(System.out::println);
+        perfectMatchingProbability[generatorIndex] =
+          perfectMatchingDistribution.stream()
+            .mapToDouble(Double::doubleValue)
+            .sum();
+        distributionRange[generatorIndex] =
+          perfectMatchingDistribution.stream()
+              .mapToDouble(Double::doubleValue)
+              .max()
+              .orElse(Double.NEGATIVE_INFINITY)
+            - perfectMatchingDistribution.stream()
+                .mapToDouble(Double::doubleValue)
+                .min()
+                .orElse(Double.POSITIVE_INFINITY);
       }
+      System.out.println();
       System.out.print("Log steps");
       Arrays.stream(algorithmNames)
         .forEachOrdered(name -> System.out.print(';' + name));
       System.out.println();
-      for (int step = 0; step < results.length; step++) {
+      for (int step = 0; step < uniformDeviation.length; step++) {
         System.out.print(step);
         for (
-          int generatorIndex = transitionMatrixGenerators.size() - 1;
-          generatorIndex >= 0;
-          generatorIndex--)
+          int generatorIndex = 0;
+          generatorIndex < transitionMatrixGenerators.size();
+          generatorIndex++)
         {
           System.out.print(';');
-          System.out.print(results[step][generatorIndex]);
+          System.out.print(uniformDeviation[step][generatorIndex]);
         }
         System.out.println();
       }
+      System.out.print("Probability of perfect matching");
+      for (
+        int generatorIndex = 0;
+        generatorIndex < transitionMatrixGenerators.size();
+        generatorIndex++)
+      {
+        System.out.print(';');
+        System.out.print(perfectMatchingProbability[generatorIndex]);
+      }
+      System.out.println();
+      System.out.print("Distribution range");
+      for (
+        int generatorIndex = 0;
+        generatorIndex < transitionMatrixGenerators.size();
+        generatorIndex++)
+      {
+        System.out.print(';');
+        System.out.print(distributionRange[generatorIndex]);
+      }
+      System.out.println();
     }
 	}
 

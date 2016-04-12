@@ -73,6 +73,17 @@ public class Matching implements Comparable<Matching> {
     
     return true;
   }
+
+  public int matchedVertexCount() {
+    int result = 0;
+    for (boolean bool : nodeBooleans) {
+			if (bool) {
+        result++;
+      }
+		}
+
+    return result;
+  }
 	
 	//removes the specified edge removed
 	//also, the nodes belonging to that edge are removed
