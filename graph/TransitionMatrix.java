@@ -155,6 +155,14 @@ class TransitionMatrix<T> {
         .max()
         .getAsDouble();
   }
+
+  double distributionTaxicab(Predicate<ReadableNode<T>> nodesToInclude) {
+    return
+      IntStream.range(0, transitionVectors.length)
+        .filter(nodeIndex -> nodesToInclude.test(orderedNodes.get(nodeIndex)))
+        .mapToDouble(this::nodeRange)
+        .sum();
+  }
   
   /**
    * Compute the range of distribution probabilities for the given node among

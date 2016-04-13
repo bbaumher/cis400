@@ -163,7 +163,8 @@ public class Tester {
 			System.out.print("2^");
 			System.out.print(iteration++);
 			System.out.print(" iterations; distance ");
-			System.out.println(convergenceTester.convergenceDistance(node -> true));
+			System.out
+        .println(convergenceTester.convergenceUniformDistance(node -> true));
 			print(convergenceTester.getTransitionMatrix().getTransitionVectors()
 			);
 		}
@@ -349,19 +350,22 @@ public class Tester {
           }
           System.out.print(';');
           System.out.print(
-            tester.convergenceDistance(node -> node.getId().isPerfect()));
+            tester
+              .convergenceUniformDistance(node -> node.getId().isPerfect()));
         }
         System.out.println();
       }
     }
     else {
       double[][] uniformDeviation = new double[logSteps + 1][];
+      double[][] taxicabDeviation = new double[logSteps + 1][];
       for (int step = uniformDeviation.length - 1; step >= 0; step--) {
         uniformDeviation[step] = new double[transitionMatrixGenerators.size()];
+        taxicabDeviation[step] = new double[transitionMatrixGenerators.size()];
       }
       double[] perfectMatchingProbability =
         new double[transitionMatrixGenerators.size()];
-      double[] distributionRange =
+      double[] distributionMaxSkew =
         new double[transitionMatrixGenerators.size()];
       for (
         int generatorIndex = transitionMatrixGenerators.size() - 1;
@@ -376,7 +380,9 @@ public class Tester {
             tester.iterateDistributions(1);
           }
           uniformDeviation[step][generatorIndex] =
-            tester.convergenceDistance(node -> node.getId().isPerfect());
+            tester.convergenceUniformDistance(node -> node.getId().isPerfect());
+          taxicabDeviation[step][generatorIndex] =
+            tester.convergenceTaxicabDistance(node -> node.getId().isPerfect());
           System.out.print(0);
         }
         Collection<Double> perfectMatchingDistribution = new ArrayList<>();
@@ -393,12 +399,12 @@ public class Tester {
           perfectMatchingDistribution.stream()
             .mapToDouble(Double::doubleValue)
             .sum();
-        distributionRange[generatorIndex] =
+        distributionMaxSkew[generatorIndex] =
           perfectMatchingDistribution.stream()
               .mapToDouble(Double::doubleValue)
               .max()
               .orElse(Double.NEGATIVE_INFINITY)
-            - perfectMatchingDistribution.stream()
+            / perfectMatchingDistribution.stream()
                 .mapToDouble(Double::doubleValue)
                 .min()
                 .orElse(Double.POSITIVE_INFINITY);
@@ -408,6 +414,7 @@ public class Tester {
       Arrays.stream(algorithmNames)
         .forEachOrdered(name -> System.out.print(';' + name));
       System.out.println();
+      System.out.println("Uniform deviation");
       for (int step = 0; step < uniformDeviation.length; step++) {
         System.out.print(step);
         for (
@@ -417,6 +424,19 @@ public class Tester {
         {
           System.out.print(';');
           System.out.print(uniformDeviation[step][generatorIndex]);
+        }
+        System.out.println();
+      }
+      System.out.println("Taxicab deviation");
+      for (int step = 0; step < uniformDeviation.length; step++) {
+        System.out.print(step);
+        for (
+          int generatorIndex = 0;
+          generatorIndex < transitionMatrixGenerators.size();
+          generatorIndex++)
+        {
+          System.out.print(';');
+          System.out.print(taxicabDeviation[step][generatorIndex]);
         }
         System.out.println();
       }
@@ -430,14 +450,14 @@ public class Tester {
         System.out.print(perfectMatchingProbability[generatorIndex]);
       }
       System.out.println();
-      System.out.print("Distribution range");
+      System.out.print("Distribution max skew");
       for (
         int generatorIndex = 0;
         generatorIndex < transitionMatrixGenerators.size();
         generatorIndex++)
       {
         System.out.print(';');
-        System.out.print(distributionRange[generatorIndex]);
+        System.out.print(distributionMaxSkew[generatorIndex]);
       }
       System.out.println();
     }

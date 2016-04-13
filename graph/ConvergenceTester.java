@@ -33,7 +33,7 @@ final class ConvergenceTester<T> {
 			System.out.print("2^");
 			System.out.print(iterations);
 			System.out.print(" steps; distance ");
-			System.out.println(convergenceDistance(nodesToInclude));
+			System.out.println(convergenceUniformDistance(nodesToInclude));
 			iterateDistributions(1);
 		}
 	}
@@ -56,9 +56,13 @@ final class ConvergenceTester<T> {
 	 * 
 	 * @return The max range of any coordinate of the distribution vector.
 	 */
-	double convergenceDistance(Predicate<ReadableNode<T>> nodesToInclude) {
+	double convergenceUniformDistance(Predicate<ReadableNode<T>> nodesToInclude) {
 		return transitionMatrix.distributionRange(nodesToInclude);
 	}
+
+  double convergenceTaxicabDistance(Predicate<ReadableNode<T>> nodesToInclude) {
+    return transitionMatrix.distributionTaxicab(nodesToInclude);
+  }
 
   /**
    * Compute, given the worst possible initial probability distribution, the
