@@ -41,21 +41,18 @@ public class BlossomAlgorithm {
 	 *  if no possible path can be found.
 	 */
 	protected static ArrayList<Edge> findAugPath(Matching matching) {
-		ArrayList<Edge> output = new ArrayList<Edge>();
 		Graph graph = matching.myGraph;
 		ArrayList<Node> nodeList = graph.getNodeList();
 		ArrayList<Edge> edgeList = graph.getEdgeList();
 		Forest forest = new Forest();
 		
-		Map<Node,Boolean> markedNodes = new TreeMap<Node,Boolean>();
-		Map<Edge,Boolean> markedEdges = new TreeMap<Edge,Boolean>();
-
 		for (Node node : nodeList) {
-			markedNodes.put(node, false);
+			node.unmark();
 		}
 		
 		for (Edge edge : edgeList) {
-			markedEdges.put(edge, matching.hasEdge(edge));
+			if (matching.hasEdge(edge)) edge.mark();
+			else edge.unmark();
 		}
 		
 		for (Node node : nodeList) {
@@ -63,8 +60,41 @@ public class BlossomAlgorithm {
 				forest.addNewTree(node);
 			}
 		}
+		
+		while (forest.getUnmarkedVertexWithEvenDistanceToRoot() != null) {
+			Node v = forest.getUnmarkedVertexWithEvenDistanceToRoot();
+			while (forest.getUnmarkedEdgeIncidentToNode(v) != null) {
+				Edge e = forest.getUnmarkedEdgeIncidentToNode(v);
+				Node w = e.getOther(v);
 				
-		return output;
+				if (!forest.containsNode(w)) {
+					////v TODO v////
+				
+					////^ TODO ^////
+				}
+				
+				else {
+					if (forest.getDistanceToRoot(w) % 2 == 1) {
+						// do nothing
+					}
+					else {
+						if (forest.getRootOfNode(v) != forest.getRootOfNode(w)) {
+							////v TODO v////
+							
+							////^ TODO ^////					
+						}
+						else {
+							////v TODO v////
+						
+							////^ TODO ^////
+						}
+					}
+				}
+				e.mark();
+			}
+			v.mark();
+		}	
+		return new ArrayList<Edge>();
 	}
 
 }

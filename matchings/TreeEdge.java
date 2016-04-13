@@ -1,28 +1,32 @@
 package matchings;
 
-public class Edge {
+public class TreeEdge {
 	
-	protected final Node node1;
-	protected final Node node2;
+	protected final TreeNode node1;
+	protected final TreeNode node2;
 	protected boolean marked;
 	
-	public Edge(Node node1, Node node2) {
+	public TreeEdge(TreeNode node1, TreeNode node2) {
 		this.node1 = node1;
 		this.node2 = node2;
 		marked = false;
 	}
 	
-	public Node getNode1() {
+	public TreeNode getNode1() {
 		return node1;
 	}
 	
-	public Node getNode2() {
+	public TreeNode getNode2() {
 		return node2;
 	}
 	
-	public Node getOther(Node node) {
+	public TreeNode getOther(TreeNode node) {
 		if (node1 == node) return node2;
 		else return node1;
+	}
+	
+	public boolean containsNode(TreeNode node) {
+		return node1 == node || node2 == node;
 	}
 	
 	@Override
