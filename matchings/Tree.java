@@ -15,6 +15,12 @@ public class Tree {
 		root = node;
 	}
 	
+	public void addNewEdge(TreeNode oldTreeNode, TreeNode newTreeNode) {
+		TreeEdge treeEdge = oldTreeNode.addEdgeTo(newTreeNode);
+		nodeList.add(newTreeNode);
+		edgeList.add(treeEdge);
+	}
+	
 	public boolean containsNode(TreeNode node) {
 		for (TreeNode n : nodeList) {
 			if (n.equals(node)) return true;

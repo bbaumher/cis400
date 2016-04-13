@@ -68,9 +68,9 @@ public class BlossomAlgorithm {
 				Node w = e.getOther(v);
 				
 				if (!forest.containsNode(w)) {
-					////v TODO v////
-				
-					////^ TODO ^////
+					Node x = matching.getIncidentNode(w);
+					forest.addNewEdge(v, w);
+					forest.addNewEdge(w, x);
 				}
 				
 				else {
@@ -79,9 +79,13 @@ public class BlossomAlgorithm {
 					}
 					else {
 						if (forest.getRootOfNode(v) != forest.getRootOfNode(w)) {
-							////v TODO v////
-							
-							////^ TODO ^////					
+							ArrayList<Edge> path = new ArrayList<Edge>();
+							ArrayList<Edge> pathFromRootToV = forest.getPathFromRootToNode(v);
+							ArrayList<Edge> pathFromWToRoot = forest.getPathFromNodeToRoot(w);
+							for (Edge edge : pathFromRootToV) path.add(edge);
+							path.add(e); //e = v -> w
+							for (Edge edge : pathFromWToRoot) path.add(edge);
+							return path;
 						}
 						else {
 							////v TODO v////

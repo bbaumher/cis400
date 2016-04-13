@@ -242,6 +242,20 @@ public class Matching implements Comparable<Matching> {
 		}
 		return true;
 	}
+	
+	protected Edge getIncidentEdge(Node node) {
+		for (Edge edge : node.getEdgeList()) {
+			if (this.hasEdge(edge)) return edge;
+		}
+		return null;
+	}
+	
+	protected Node getIncidentNode(Node node) {
+		for (Edge edge : node.getEdgeList()) {
+			if (this.hasEdge(edge)) return edge.getOther(node);
+		}
+		return null;
+	}
 
 	@Override
 	public int compareTo(Matching other) {
