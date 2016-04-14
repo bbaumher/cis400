@@ -182,4 +182,15 @@ public class Forest {
 		return treeNode1.getEdgeTo(treeNode2);
 	}
 	
+	@Override
+	public String toString() {
+		String output = "{";
+		for (int i = 0; i < treeList.size(); i++) {
+			if (i != 0) output += ", ";
+			output += treeList.get(i);
+		}
+		output += "}";
+		return output;
+	}
+	
 }

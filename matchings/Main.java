@@ -17,21 +17,19 @@ public class Main {
 		
 		
 		
-		Graph graph = new Graph(6);
-		graph.addEdgeBetweenNodes(0,1);
-		graph.addEdgeBetweenNodes(1,2);
-		graph.addEdgeBetweenNodes(3,4);
-		graph.addEdgeBetweenNodes(4,5);
-		graph.addEdgeBetweenNodes(0,3);
-		graph.addEdgeBetweenNodes(1,4);
-		graph.addEdgeBetweenNodes(2,5);
+		Graph graph = new Graph(8,'a');
+		Matching matching = new Matching(graph);
+		matching.fillSmartly();
+		System.out.println(matching);
+		
+		/*
 		
 		MatchingGraph matchingGraph = MatchingGraphGenerator.generate(graph);
 		
 		GraphAssessor.assess(graph);
 		System.out.println();
 		GraphAssessor.assess(matchingGraph);
-		
+		*/
 		
 		
 		/*

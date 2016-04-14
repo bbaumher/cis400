@@ -27,7 +27,9 @@ public class Edge {
 	
 	@Override
 	public String toString() {
-		return node1 + " <-> " + node2;
+		String string = node1 + " <-> " + node2;
+		if (marked) string += "'";
+		return string;
 	}
 	
 	public boolean isMarked() {

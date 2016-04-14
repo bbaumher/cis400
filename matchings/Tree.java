@@ -32,5 +32,16 @@ public class Tree {
 		return root;
 	}
 	
+	@Override
+	public String toString() {
+		String output = "{";
+		for (int i = 0; i < nodeList.size(); i++) {
+			if (i != 0) output += ",";
+			output += nodeList.get(i);
+		}
+		output += "}";
+		return output;
+	}
+	
 
 }

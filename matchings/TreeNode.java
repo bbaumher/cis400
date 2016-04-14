@@ -1,7 +1,7 @@
 package matchings;
 import java.util.ArrayList;
 
-public class TreeNode implements Comparable<Node> {
+public class TreeNode implements Comparable<TreeNode> {
 
 	protected final ArrayList<TreeEdge> edgeList;
 	protected final ArrayList<TreeNode> neighbors;
@@ -68,7 +68,7 @@ public class TreeNode implements Comparable<Node> {
 	}
 
 	@Override
-	public int compareTo(Node arg0) {
+	public int compareTo(TreeNode arg0) {
 		return this.name.compareTo(arg0.name);
 	}
 	

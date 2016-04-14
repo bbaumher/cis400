@@ -52,7 +52,9 @@ public class Node implements Comparable<Node> {
 	
 	@Override
 	public String toString() {
-		return name;
+		String string = name;
+		if (marked) string += "'";
+		return string;
 	}
 
 	@Override

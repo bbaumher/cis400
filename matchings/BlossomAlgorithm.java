@@ -65,8 +65,8 @@ public class BlossomAlgorithm {
 		
 		while (forest.getUnmarkedVertexWithEvenDistanceToRoot() != null) {
 			Node v = forest.getUnmarkedVertexWithEvenDistanceToRoot();
-			while (forest.getUnmarkedEdgeIncidentToNode(v) != null) {
-				Edge e = forest.getUnmarkedEdgeIncidentToNode(v);
+			while (graph.getUnmarkedEdgeIncidentToNode(v) != null) {
+				Edge e = graph.getUnmarkedEdgeIncidentToNode(v);
 				Node w = e.getOther(v);
 				//e = (v,w)
 				
@@ -105,7 +105,7 @@ public class BlossomAlgorithm {
 							blossomNodePath.remove(blossomNodePath.size()-1); //remove end so no repeats
 							
 							//create contracted graph2
-							Graph graph2 = new Graph(graph.getNodeCount() - blossomNodes.size() + 1);
+							Graph graph2 = new Graph(graph.getNodeCount() - blossomNodes.size() + 1, "z");
 							
 							//map nodes in graph to graph2
 							Node blossomNode = graph2.getNodeIndexedAt(0);
@@ -116,7 +116,7 @@ public class BlossomAlgorithm {
 							int index = 1;
 							for (Node node : graph.getNodeList()) {
 								if (blossomNodes.contains(node)) continue;
-								nodeToNode2.put(node, graph.getNodeIndexedAt(index));
+								nodeToNode2.put(node, graph2.getNodeIndexedAt(index));
 								index++;
 							}
 							
@@ -137,6 +137,7 @@ public class BlossomAlgorithm {
 								for (Node neighbor : node.getNeighbors()) {
 									Node node2 = nodeToNode2.get(node);
 									Node neighbor2 = nodeToNode2.get(neighbor);
+									if (node2 == neighbor2) continue;
 									graph2.addEdgeBetweenNodes(node2, neighbor2);
 								}
 							}
@@ -148,6 +149,7 @@ public class BlossomAlgorithm {
 									Edge edge = node.getEdgeTo(neighbor);
 									Node node2 = nodeToNode2.get(node);
 									Node neighbor2 = nodeToNode2.get(neighbor);
+									if (node2 == neighbor2) continue;
 									Edge edge2 = node2.getEdgeTo(neighbor2);
 									if (matching.hasEdge(edge)) matching2.addEdge(edge2);
 								}
