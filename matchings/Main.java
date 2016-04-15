@@ -19,8 +19,6 @@ public class Main {
 		
 		Graph graph = new Graph(8);
 		
-		
-		
 		Node n0 = graph.getNodeIndexedAt(0);
 		Node n1 = graph.getNodeIndexedAt(1);
 		Node n2 = graph.getNodeIndexedAt(2);
@@ -30,9 +28,18 @@ public class Main {
 		Node n6 = graph.getNodeIndexedAt(6);
 		Node n7 = graph.getNodeIndexedAt(7);
 		
-		//graph.addEdgeBetweenNodes(n0,n1);
 		graph.addEdgeBetweenNodes(n0,n4);
-		//graph.addEdgeBetweenNodes(n0,n5);
+		graph.addEdgeBetweenNodes(n4,n5);
+		graph.addEdgeBetweenNodes(n5,n6);
+		graph.addEdgeBetweenNodes(n6,n7);
+		graph.addEdgeBetweenNodes(n7,n3);
+		graph.addEdgeBetweenNodes(n3,n2);
+		graph.addEdgeBetweenNodes(n2,n1);
+		
+		/*
+		graph.addEdgeBetweenNodes(n0,n1);
+		graph.addEdgeBetweenNodes(n0,n4);
+		graph.addEdgeBetweenNodes(n0,n5);
 		graph.addEdgeBetweenNodes(n1,n2);
 		graph.addEdgeBetweenNodes(n1,n4);
 		graph.addEdgeBetweenNodes(n1,n5);
@@ -46,6 +53,7 @@ public class Main {
 		graph.addEdgeBetweenNodes(n4,n5);
 		graph.addEdgeBetweenNodes(n5,n6);
 		graph.addEdgeBetweenNodes(n6,n7);
+		*/
 		
 		Matching matching = new Matching(graph);
 		matching.fillSmartly();

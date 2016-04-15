@@ -15,6 +15,8 @@ public class Matching implements Comparable<Matching> {
 	}
 	
 	public void fill() {
+		this.fillSmartly();
+		/*
 		for (int nodeIndex = 0; nodeIndex < nodeBooleans.length; nodeIndex++) {
 			boolean nodeBool = nodeBooleans[nodeIndex];
 			if (nodeBool == true) continue; //node already covered
@@ -32,7 +34,7 @@ public class Matching implements Comparable<Matching> {
 				edgeBooleans[edgeIndex] = true;
 				break;
 			}
-		}
+		}*/
 	}
 	
 	public void fillSmartly() {
