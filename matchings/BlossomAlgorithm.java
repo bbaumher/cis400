@@ -200,7 +200,8 @@ public class BlossomAlgorithm {
 								
 								//iterate through all possible paths in the blossom
 								for (int startIndex = 0; startIndex < blossomNodePath.size(); startIndex++) {
-									for (int endIndex = startIndex+1; endIndex < blossomNodePath.size(); endIndex++) {
+									for (int endIndex = 0; endIndex < blossomNodePath.size(); endIndex++) {
+										if (startIndex == endIndex) continue;
 										for (int k = 0; k < 2; k++) {
 											boolean rightwards = (k == 0) ? true : false;
 											ArrayList<Node> midPath = getNodeSubpath(blossomNodePath, startIndex, endIndex, rightwards);
@@ -211,7 +212,8 @@ public class BlossomAlgorithm {
 											
 											//determine if this is a valid alternating path
 											if (concatEdgePath == null) continue; //transition in/out of blossom has no edge
-											if (!isValidAlternatingPath(concatEdgePath, matching)) continue; //not alternating
+											if (concatEdgePath.size() % 2 == 0) continue; //even number of edges
+											if (!matching.isValidAugmentation(concatEdgePath)) continue; //toggling edges increases count
 											return concatEdgePath;
 										}
 									}
@@ -327,6 +329,22 @@ public class BlossomAlgorithm {
 			Edge edge = path.get(i);
 			boolean there = matching.hasEdge(edge);
 			if (!there) return false;
+		}
+		
+		return true;
+	}
+	
+	/** Determines whether the path is alternating.
+	 */
+	protected static boolean isAlternatingPath(ArrayList<Edge> path, Matching matching) {
+		if (path == null || matching == null) return false;
+		
+		for (int i = 0; i < path.size()-1; i++) {
+			Edge edge1 = path.get(i);
+			Edge edge2 = path.get(i+1);
+			boolean edge1There = matching.hasEdge(edge1);
+			boolean edge2There = matching.hasEdge(edge2);
+			if (edge1There == edge2There) return false;
 		}
 		
 		return true;
