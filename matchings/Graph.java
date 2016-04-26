@@ -14,6 +14,14 @@ public class Graph {
 		edgeList = new ArrayList<Edge>();
 	}
 	
+	public Graph (int numNodes, String string) {
+		nodeList = new ArrayList<Node>();
+		for(int i = 0; i < numNodes; i++) {
+			nodeList.add(i, new Node(string + i));
+		}
+		edgeList = new ArrayList<Edge>();
+	}
+	
 	public Graph (int numNodes, double prob) {
 		nodeList = new ArrayList<Node>();
 		for(int i = 0; i < numNodes; i++) {
@@ -155,6 +163,13 @@ public class Graph {
 	
 	public ArrayList<Edge> getEdgeList() {
 		return edgeList;
+	}
+
+	public Edge getUnmarkedEdgeIncidentToNode(Node node) {
+		for (Edge edge : node.getEdgeList()) {
+			if (!edge.isMarked()) return edge;
+		}
+		return null;
 	}
 
 }

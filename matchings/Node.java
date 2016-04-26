@@ -6,11 +6,13 @@ public class Node implements Comparable<Node> {
 	protected final ArrayList<Edge> edgeList;
 	protected final ArrayList<Node> neighbors;
 	protected final String name;
+	protected boolean marked;
 	
 	public Node (String name) {
 		edgeList = new ArrayList<Edge>();
 		neighbors = new ArrayList<Node>();
 		this.name = name;
+		marked = false;
 	}
 	
 	public boolean hasEdgeTo(Node other) {
@@ -50,7 +52,9 @@ public class Node implements Comparable<Node> {
 	
 	@Override
 	public String toString() {
-		return name;
+		String string = name;
+		if (marked) string += "'";
+		return string;
 	}
 
 	@Override
@@ -62,6 +66,18 @@ public class Node implements Comparable<Node> {
 		}
 		
 		return this.toString().compareTo(other.toString());
+	}
+	
+	public boolean isMarked() {
+		return marked;
+	}
+	
+	public void mark() {
+		marked = true;
+	}
+	
+	public void unmark() {
+		marked = false;
 	}
 	
 }

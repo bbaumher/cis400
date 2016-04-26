@@ -17,21 +17,56 @@ public class Main {
 		
 		
 		
-		Graph graph = new Graph(6);
-		graph.addEdgeBetweenNodes(0,1);
-		graph.addEdgeBetweenNodes(1,2);
-		graph.addEdgeBetweenNodes(3,4);
-		graph.addEdgeBetweenNodes(4,5);
-		graph.addEdgeBetweenNodes(0,3);
-		graph.addEdgeBetweenNodes(1,4);
-		graph.addEdgeBetweenNodes(2,5);
+		Graph graph = new Graph(8);
+		
+		Node n0 = graph.getNodeIndexedAt(0);
+		Node n1 = graph.getNodeIndexedAt(1);
+		Node n2 = graph.getNodeIndexedAt(2);
+		Node n3 = graph.getNodeIndexedAt(3);
+		Node n4 = graph.getNodeIndexedAt(4);
+		Node n5 = graph.getNodeIndexedAt(5);
+		Node n6 = graph.getNodeIndexedAt(6);
+		Node n7 = graph.getNodeIndexedAt(7);
+		
+		graph.addEdgeBetweenNodes(n0,n4);
+		graph.addEdgeBetweenNodes(n4,n5);
+		graph.addEdgeBetweenNodes(n5,n6);
+		graph.addEdgeBetweenNodes(n6,n7);
+		graph.addEdgeBetweenNodes(n7,n3);
+		graph.addEdgeBetweenNodes(n3,n2);
+		graph.addEdgeBetweenNodes(n2,n1);
+		
+		/*
+		graph.addEdgeBetweenNodes(n0,n1);
+		graph.addEdgeBetweenNodes(n0,n4);
+		graph.addEdgeBetweenNodes(n0,n5);
+		graph.addEdgeBetweenNodes(n1,n2);
+		graph.addEdgeBetweenNodes(n1,n4);
+		graph.addEdgeBetweenNodes(n1,n5);
+		graph.addEdgeBetweenNodes(n1,n6);
+		graph.addEdgeBetweenNodes(n2,n3);
+		graph.addEdgeBetweenNodes(n2,n5);
+		graph.addEdgeBetweenNodes(n2,n6);
+		graph.addEdgeBetweenNodes(n2,n7);
+		graph.addEdgeBetweenNodes(n3,n6);
+		graph.addEdgeBetweenNodes(n3,n7);
+		graph.addEdgeBetweenNodes(n4,n5);
+		graph.addEdgeBetweenNodes(n5,n6);
+		graph.addEdgeBetweenNodes(n6,n7);
+		*/
+		
+		Matching matching = new Matching(graph);
+		matching.fillSmartly();
+		System.out.println(matching);
+		
+		/*
 		
 		MatchingGraph matchingGraph = MatchingGraphGenerator.generate(graph);
 		
 		GraphAssessor.assess(graph);
 		System.out.println();
 		GraphAssessor.assess(matchingGraph);
-		
+		*/
 		
 		
 		/*

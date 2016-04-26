@@ -15,6 +15,8 @@ public class Matching implements Comparable<Matching> {
 	}
 	
 	public void fill() {
+		this.fillSmartly();
+		/*
 		for (int nodeIndex = 0; nodeIndex < nodeBooleans.length; nodeIndex++) {
 			boolean nodeBool = nodeBooleans[nodeIndex];
 			if (nodeBool == true) continue; //node already covered
@@ -32,7 +34,7 @@ public class Matching implements Comparable<Matching> {
 				edgeBooleans[edgeIndex] = true;
 				break;
 			}
-		}
+		}*/
 	}
 	
 	public void fillSmartly() {
@@ -65,13 +67,10 @@ public class Matching implements Comparable<Matching> {
 	}
 
   public boolean isPerfect() {
-		for (boolean bool : nodeBooleans) {
-			if (!bool) {
-        return false;
-      }
-		}
-    
-    return true;
+	  for (boolean bool : nodeBooleans) {
+		  if (!bool) return false;
+	  }
+	  return true;
   }
 
   public int matchedVertexCount() {
@@ -144,6 +143,67 @@ public class Matching implements Comparable<Matching> {
 			clone.nodeBooleans[i] = this.nodeBooleans[i];
 		}
 		return clone;
+	}
+	
+	/** Takes in an odd length edge path and returns whether
+	 *  setting all even edges to true and all odd edges to false
+	 *  would result in a valid matching with more edges set to true.
+	 */
+	public boolean isValidAugmentation(ArrayList<Edge> augPath) {
+		
+		Matching clone = this.clone();
+		int startNumEdges = clone.getNumEdges();
+
+		for (int i = 1; i < augPath.size(); i += 2) {
+			Edge edge = augPath.get(i);
+			clone.removeEdge(edge);
+		}
+		for (int i = 0; i < augPath.size(); i += 2) {
+			Edge edge = augPath.get(i);
+			clone.addEdge(edge);
+		}
+		
+		ArrayList<Edge> cloneEdges = new ArrayList<Edge>();
+		for (int i = 0; i < clone.edgeBooleans.length; i++) {
+			if (edgeBooleans[i]) cloneEdges.add(clone.myGraph.getEdgeIndexedAt(i));
+		}
+		
+		ArrayList<Node> cloneNodes = new ArrayList<Node>();
+		for (Edge edge : cloneEdges) {
+			Node node1 = edge.getNode1();
+			Node node2 = edge.getNode2();
+			cloneNodes.add(node1);
+			cloneNodes.add(node2);
+		}
+		
+		//check if two edges share a node
+		for (int i = 0; i < cloneNodes.size(); i++) {
+			for (int j = i+1; j < cloneNodes.size(); j++) {
+				Node node1 = cloneNodes.get(i);
+				Node node2 = cloneNodes.get(j);
+				if (node1 == node2) return false; //invalid edge arrangement
+			}
+		}
+		
+		int endNumEdges = clone.getNumEdges();
+		
+		return endNumEdges > startNumEdges;
+	}
+	
+	public int getNumEdges() {
+		int sum = 0;
+		for (boolean bool : edgeBooleans) {
+			if (bool) sum++;
+		}
+		return sum;
+	}
+	
+	public int getNumNodes() {
+		int sum = 0;
+		for (boolean bool : nodeBooleans) {
+			if (bool) sum++;
+		}
+		return sum;
 	}
 	
 	@Override
@@ -241,6 +301,20 @@ public class Matching implements Comparable<Matching> {
 			if (this.hasEdge(edge)) return false;
 		}
 		return true;
+	}
+	
+	protected Edge getIncidentEdge(Node node) {
+		for (Edge edge : node.getEdgeList()) {
+			if (this.hasEdge(edge)) return edge;
+		}
+		return null;
+	}
+	
+	protected Node getIncidentNode(Node node) {
+		for (Edge edge : node.getEdgeList()) {
+			if (this.hasEdge(edge)) return edge.getOther(node);
+		}
+		return null;
 	}
 
 	@Override
