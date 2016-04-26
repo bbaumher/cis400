@@ -85,10 +85,12 @@ final class RegularGraphGenerator {
             && remainingVertices.contains(vertex2))
         {
           eligibleEdges
-            .removeValue(remainingVertices.getIndex(vertex1) * degree
+            .removeValue(
+              remainingVertices.getIndex(vertex1) * remainingVertices.getSize()
                 + remainingVertices.getIndex(vertex2));
           eligibleEdges
-            .removeValue(remainingVertices.getIndex(vertex2) * degree
+            .removeValue(
+              remainingVertices.getIndex(vertex2) * remainingVertices.getSize()
                 + remainingVertices.getIndex(vertex1));
         }
       }
